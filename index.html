@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <title>سازنده کپشن تاویتا</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- فونت فارسی شبیه شبیه یکان -->
+    <link
+      href="https://cdn.jsdelivr.net/gh/rastikerdar/shabnam-font/dist/font-face.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background: #f3f7f4;
+        font-family: "Shabnam", sans-serif;
+      }
+
+      .app {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* 🎨 هدر سبز مینیمال */
+      .app-header {
+        background: linear-gradient(135deg, #0f9d58, #12b565);
+        color: #ffffff;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+      }
+
+      .app-header-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .app-header-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .app-header-title {
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .app-header-subtitle {
+        font-size: 13px;
+        opacity: 0.9;
+      }
+
+      /* بدنه */
+      .chat-wrapper {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        padding: 10px;
+      }
+
+      .chat-container {
+        width: 100%;
+        max-width: 720px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 18px 18px 0 0;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+      }
+
+      .top-text {
+        padding: 14px 16px 4px;
+        font-size: 13px;
+        color: #4b5563;
+      }
+
+      .top-text b {
+        color: #065f46;
+      }
+
+      /* فرم کپشن */
+      .form-section {
+        padding: 8px 16px 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .field-label {
+        font-size: 12px;
+        color: #374151;
+      }
+
+      .field-description {
+        font-size: 11px;
+        color: #6b7280;
+      }
+
+      .field-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+      }
+
+      .field-row > * {
+        flex: 1;
+      }
+
+      .input, .select {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid #c4e2d3;
+        padding: 8px 10px;
+        font-size: 13px;
+        font-family: inherit;
+        background: #f5fbf7;
+      }
+
+      .input:focus,
+      .select:focus {
+        outline: none;
+        border-color: #0f9d58;
+        box-shadow: 0 0 0 2px rgba(15, 157, 88, 0.18);
+        background: #ffffff;
+      }
+
+      .textarea {
+        min-height: 72px;
+        resize: vertical;
+      }
+
+      .helper-hint {
+        font-size: 11px;
+        color: #6b7280;
+        margin-top: 3px;
+      }
+
+      .helper-hint span {
+        color: #059669;
+      }
+
+      .build-row {
+        padding: 8px 16px 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .emoji-button {
+        background: #ffffff;
+        border-radius: 10px;
+        border: 1px solid #d5eadf;
+        width: 40px;
+        height: 36px;
+        cursor: pointer;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .build-button {
+        flex: 1;
+        background: #0f9d58;
+        color: #ffffff;
+        border: none;
+        border-radius: 12px;
+        padding: 9px 14px;
+        font-size: 14px;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(15, 157, 88, 0.35);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
+      .build-button:active {
+        transform: scale(0.97);
+      }
+
+      .build-note {
+        padding: 0 16px;
+        font-size: 11px;
+        color: #6b7280;
+      }
+
+      /* لیست کپشن‌ها */
+      .results {
+        padding: 8px 12px 12px;
+        overflow-y: auto;
+        flex: 1;
+      }
+
+      .caption-card {
+        border-radius: 14px;
+        border: 1px solid #e5f3ec;
+        padding: 10px 10px;
+        margin-bottom: 8px;
+        background: #ffffff;
+        box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
+        position: relative;
+      }
+
+      .caption-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: #065f46;
+        margin-bottom: 4px;
+      }
+
+      .caption-text {
+        font-size: 13px;
+        line-height: 1.7;
+        white-space: pre-wrap;
+      }
+
+      .caption-footer {
+        margin-top: 6px;
+        font-size: 11px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #6b7280;
+      }
+
+      .copy-btn {
+        border: none;
+        background: #ecfdf3;
+        color: #047857;
+        border-radius: 999px;
+        padding: 4px 9px;
+        font-size: 11px;
+        cursor: pointer;
+      }
+
+      .tag-pill {
+        border-radius: 999px;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        padding: 2px 8px;
+        font-size: 10px;
+        color: #166534;
+      }
+
+      /* وضعیت‌ها */
+      .status {
+        font-size: 12px;
+        padding: 4px 16px 8px;
+        color: #6b7280;
+      }
+
+      .status.error {
+        color: #b91c1c;
+      }
+
+      .status.loading {
+        color: #047857;
+      }
+
+      /* پنل ایموجی ساده */
+      .emoji-picker {
+        position: absolute;
+        z-index: 10;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
+        padding: 6px 8px;
+        display: flex;
+        gap: 4px;
+      }
+
+      .emoji-picker span {
+        cursor: pointer;
+        font-size: 18px;
+        padding: 3px 5px;
+        border-radius: 8px;
+      }
+
+      .emoji-picker span:hover {
+        background: #f3f4f6;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      @media (max-width: 600px) {
+        .chat-container {
+          border-radius: 0;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="app">
+      <!-- هدر سبز با لوگوی طاویتا -->
+      <header class="app-header">
+        <div class="app-header-avatar">
+          <img
+            src="https://cdnfa.com/irangiah/a9be/uploads/new12/picsart-25-11-13-15-57-05-527.png"
+            alt="لوگو طاویتا"
+          />
+        </div>
+        <div>
+          <div class="app-header-title">سازنده کپشن تاویتا</div>
+          <div class="app-header-subtitle">دستیار هوشمند شما در ایتا</div>
+        </div>
+      </header>
+
+      <div class="chat-wrapper">
+        <div class="chat-container">
+          <div class="top-text">
+            اینجا <b>ایده پست</b> رو بنویس، لحن و پلتفرم رو انتخاب کن،
+            تاویتا برات چند کپشن آماده می‌کند ✨
+          </div>
+
+          <div class="form-section">
+            <div>
+              <div class="field-label">ایده یا توضیح پست</div>
+              <textarea
+                id="briefInput"
+                class="input textarea"
+                placeholder="مثلاً: معرفی دوره آموزش هوش مصنوعی برای تولید محتوا، تخفیف ویژه، تأکید روی کاربردی بودن."
+              ></textarea>
+              <div class="helper-hint">
+                پیشنهاد: هم موضوع، هم مخاطب و هم هدف پست را بنویس
+                <span>تا کپشن دقیق‌تر شود</span>.
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div>
+                <div class="field-label">پلتفرم</div>
+                <select id="platformSelect" class="select">
+                  <option value="اینستاگرام">اینستاگرام</option>
+                  <option value="ایتا">ایتا</option>
+                  <option value="تلگرام">تلگرام</option>
+                  <option value="یوتیوب">یوتیوب / شورتز</option>
+                  <option value="عمومی">متن عمومی</option>
+                </select>
+              </div>
+              <div>
+                <div class="field-label">لحن متن</div>
+                <select id="toneSelect" class="select">
+                  <option value="صمیمی و خودمانی">صمیمی و خودمانی</option>
+                  <option value="رسمی و حرفه‌ای">رسمی و حرفه‌ای</option>
+                  <option value="انگیزشی">انگیزشی</option>
+                  <option value="تبلیغاتی و فروش">تبلیغاتی و فروش</option>
+                  <option value="آموزشی">آموزشی</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="build-row">
+            <button
+              type="button"
+              id="emojiBtn"
+              class="emoji-button"
+              aria-label="ایموجی"
+            >
+              🙂
+            </button>
+            <button id="buildBtn" class="build-button" type="button">
+              ✨ ساخت کپشن
+            </button>
+          </div>
+          <div class="build-note">
+            هر درخواست به‌صورت مستقل پردازش می‌شود (حافظه چت ندارد) تا سبک
+            کپشن‌ها ثابت و تمیز بماند ✅
+          </div>
+
+          <div id="status" class="status"></div>
+
+          <div id="results" class="results"></div>
+
+          <!-- پنل ایموجی -->
+          <div id="emojiPicker" class="emoji-picker hidden">
+            <span>🙂</span>
+            <span>😊</span>
+            <span>😂</span>
+            <span>🥲</span>
+            <span>✨</span>
+            <span>🌱</span>
+            <span>💚</span>
+            <span>🚀</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const briefInput = document.getElementById("briefInput");
+      const platformSelect = document.getElementById("platformSelect");
+      const toneSelect = document.getElementById("toneSelect");
+      const buildBtn = document.getElementById("buildBtn");
+      const statusEl = document.getElementById("status");
+      const resultsEl = document.getElementById("results");
+      const emojiBtn = document.getElementById("emojiBtn");
+      const emojiPicker = document.getElementById("emojiPicker");
+
+      let isLoading = false;
+
+      function setStatus(text, type = "") {
+        statusEl.textContent = text || "";
+        statusEl.className = "status" + (type ? " " + type : "");
+      }
+
+      function addCaptionCard(index, text) {
+        const card = document.createElement("div");
+        card.className = "caption-card";
+
+        const title = document.createElement("div");
+        title.className = "caption-title";
+        title.textContent = `کپشن ${index}`;
+
+        const body = document.createElement("div");
+        body.className = "caption-text";
+        body.textContent = text;
+
+        const footer = document.createElement("div");
+        footer.className = "caption-footer";
+
+        const tag = document.createElement("div");
+        tag.className = "tag-pill";
+        tag.textContent = "تاویتا • caption maker";
+
+        const copyBtn = document.createElement("button");
+        copyBtn.className = "copy-btn";
+        copyBtn.textContent = "کپی متن";
+
+        copyBtn.addEventListener("click", () => {
+          navigator.clipboard
+            .writeText(text)
+            .then(() => {
+              copyBtn.textContent = "کپی شد ✅";
+              setTimeout(() => (copyBtn.textContent = "کپی متن"), 1200);
+            })
+            .catch(() => {});
+        });
+
+        footer.appendChild(tag);
+        footer.appendChild(copyBtn);
+
+        card.appendChild(title);
+        card.appendChild(body);
+        card.appendChild(footer);
+
+        resultsEl.appendChild(card);
+      }
+
+      async function buildCaptions() {
+        const brief = briefInput.value.trim();
+        const platform = platformSelect.value;
+        const tone = toneSelect.value;
+
+        if (!brief) {
+          setStatus("لطفاً اول توضیح پست را بنویس.", "error");
+          return;
+        }
+
+        if (isLoading) return;
+        isLoading = true;
+        buildBtn.disabled = true;
+        setStatus("در حال ساخت کپشن‌ها با کمک هوش مصنوعی…", "loading");
+        resultsEl.innerHTML = "";
+
+        const fullPrompt = `
+من می‌خواهم برای یک پست شبکه اجتماعی کپشن بنویسی.
+
+جزئیات:
+- توضیح پست: ${brief}
+- پلتفرم: ${platform}
+- لحن: ${tone}
+
+قوانین تولید کپشن:
+- ۳ کپشن پیشنهادی بده.
+- هر کپشن را با شماره‌گذاری واضح بنویس (۱)، ۲)، ۳)).
+- هر کپشن حداکثر ۲ جمله باشد.
+- از ایموجی به صورت متعادل استفاده کن.
+- اگر مناسب بود، در پایان هر کپشن ۲ تا ۴ هشتگ فارسی و انگلیسی بنویس.
+- کپشن‌ها کاملاً فارسی باشند و برای شبکه‌های اجتماعی جذاب و قابل استفاده؛
+- کپشن‌ها با هم متفاوت باشند (کپی همدیگر نباشند).
+        `.trim();
+
+        try {
+          const res = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: fullPrompt }),
+          });
+
+          const data = await res.json().catch(() => ({}));
+
+          if (!res.ok || !data || data.ok === false || !data.answer) {
+            const msg =
+              (data && data.error) ||
+              "خطا در دریافت پاسخ از سرور. کمی بعد دوباره تلاش کن.";
+            setStatus(msg, "error");
+            isLoading = false;
+            buildBtn.disabled = false;
+            return;
+          }
+
+          const answer = (data.answer || "").trim();
+          if (!answer) {
+            setStatus("پاسخی دریافت نشد. دوباره امتحان کن.", "error");
+            isLoading = false;
+            buildBtn.disabled = false;
+            return;
+          }
+
+          // سعی می‌کنیم جواب را به چند کپشن جدا تقسیم کنیم
+          const parts = answer
+            .split(/\n(?=\s*[0-9۱-۳][\).\)]\s)/) // جدا کردن بر اساس ۱) ، ۲) ...
+            .map((p) => p.trim())
+            .filter((p) => p.length > 0);
+
+          resultsEl.innerHTML = "";
+
+          if (parts.length === 0) {
+            addCaptionCard(1, answer);
+          } else {
+            parts.forEach((part, idx) => {
+              // شماره را از ابتدای خط پاک می‌کنیم
+              const cleaned = part.replace(/^[0-9۰-۹][\).\)]\s*/, "").trim();
+              addCaptionCard(idx + 1, cleaned || part);
+            });
+          }
+
+          setStatus("✅ کپشن‌ها آماده‌اند. هرکدام را دوست داشتی کپی کن.");
+        } catch (err) {
+          console.error(err);
+          setStatus(
+            "❌ خطای شبکه رخ داد. اینترنت / فیلترشکن را بررسی کن.",
+            "error"
+          );
+        } finally {
+          isLoading = false;
+          buildBtn.disabled = false;
+        }
+      }
+
+      buildBtn.addEventListener("click", buildCaptions);
+
+      // پنل ایموجی برای اضافه‌کردن به توضیح پست
+      emojiBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const rect = emojiBtn.getBoundingClientRect();
+        emojiPicker.style.top = rect.top + window.scrollY - 60 + "px";
+        emojiPicker.style.left =
+          rect.left + window.scrollX - emojiPicker.offsetWidth / 2 + "px";
+        emojiPicker.classList.toggle("hidden");
+      });
+
+      emojiPicker.querySelectorAll("span").forEach((span) => {
+        span.addEventListener("click", () => {
+          const emoji = span.textContent;
+          briefInput.value = (briefInput.value + " " + emoji).trim();
+          briefInput.focus();
+          emojiPicker.classList.add("hidden");
+        });
+      });
+
+      document.addEventListener("click", (e) => {
+        if (
+          !emojiPicker.contains(e.target) &&
+          e.target !== emojiBtn &&
+          !emojiBtn.contains(e.target)
+        ) {
+          emojiPicker.classList.add("hidden");
+        }
+      });
+    </script>
+  </body>
+</html>
