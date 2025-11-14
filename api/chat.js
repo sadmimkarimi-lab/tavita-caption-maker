@@ -1,6 +1,6 @@
 // api/chat.js
 
-// تابع کمکى برای تمیز کردن متن خروجی
+// تمیز کردن خروجی: کمی مرتب‌تر برای نمایش داخل حباب
 function cleanAnswer(text) {
   if (!text || typeof text !== "string") {
     return "نتوانستم پاسخی تولید کنم.";
@@ -8,13 +8,13 @@ function cleanAnswer(text) {
 
   let t = text.trim();
 
-  // یکنواخت کردن خط‌ها
+  // نرمال‌سازی خط‌ها
   t = t.replace(/\r\n/g, "\n");
 
   // حداکثر دو خط خالی پشت سر هم
   t = t.replace(/\n{3,}/g, "\n\n");
 
-  // حذف فاصله‌های اضافه آخر هر خط
+  // حذف فاصله‌های اضافه در انتهای هر خط
   const lines = t.split("\n").map((line) => line.replace(/\s+$/g, ""));
   return lines.join("\n");
 }
@@ -33,52 +33,54 @@ export default async function handler(req, res) {
       .json({ ok: false, error: "کلید OpenAI روی سرور تنظیم نشده است." });
   }
 
-  const userMessage = req.body?.text || null;
+  // ورودی را از بدنه بخوانیم (چند حالت مختلف)
+  const userMessage =
+    req.body?.text ||      // فرانت کپشن‌ساز: { text: "..." }
+    req.body?.message ||   // اگر جایی { message: "..." } فرستاده شود
+    req.body?.message?.text || // حالت وبهوک شبیه ایتا
+    null;
 
   if (!userMessage || typeof userMessage !== "string") {
     return res
       .status(400)
-      .json({ ok: false, error: "متن برای ساخت کپشن ارسال نشده است." });
+      .json({ ok: false, error: "پیام کاربر ارسال نشده است." });
   }
 
   try {
-    const response = await fetch(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            {
-              role: "system",
-              content: `
-تو یک سازنده کپشن فارسی برای شبکه‌های اجتماعی هستی.
+    // هر درخواست مستقل است؛ بدون حافظه
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: `
+تو دستیار هوشمند فارسی‌زبان طاویتا هستی.
 
 قوانین:
-- فقط بر اساس همین ورودی فعلی جواب بده (حافظه چت نداری).
-- ۳ کپشن پیشنهادی بده، واضح و تفکیک‌شده.
-- کپشن‌ها برای اینستاگرام، ایتا، تلگرام و … مناسب باشند.
-- هر کپشن حداکثر ۲ جمله باشد و خوانا و تمیز.
-- از ایموجی‌ها به شکل متعادل استفاده کن.
-- اگر متناسب بود، در انتهای هر کپشن ۲ تا ۴ هشتگ فارسی و انگلیسی بنویس.
-- کپشن‌ها با هم متفاوت باشند و کپی هم نباشند.
-- لحن را بر اساس توضیحات کاربر (مثلاً صمیمی، رسمی، انگیزشی، فروش) تنظیم کن.
+- هر درخواست را مستقل در نظر بگیر؛ به پیام‌های قبلی دسترسی نداری.
+- معمولاً کاربر از تو کپشن، متن، تیتر، ایده محتوا یا پرامپت برای طراحی می‌خواهد.
+- بر اساس بهترین اصول نگارش کپشن و متن شبکه‌های اجتماعی (هوک، بدنه، CTA، هشتگ‌های مناسب) جواب بده؛ مگر این‌که کاربر چیز دیگری خواسته باشد.
+- اگر کاربر مشخصات دقیق داده (پلتفرم، لحن، هدف، مخاطب و...) حتماً آن‌ها را رعایت کن.
+- کوتاه، واضح و خوش‌خوان بنویس؛ از پاراگراف‌های خیلی بلند و پرحرفی خودداری کن.
+- اگر لازم بود، می‌توانی بولت‌پوینت (با - در ابتدای خط) استفاده کنی.
+- لحن: محترمانه، صمیمی و حرفه‌ای.
             `.trim(),
-            },
-            {
-              role: "user",
-              content: userMessage,
-            },
-          ],
-          temperature: 0.7,
-          max_tokens: 400,
-        }),
-      }
-    );
+          },
+          {
+            role: "user",
+            content: userMessage,
+          },
+        ],
+        temperature: 0.6,
+        max_tokens: 500,
+      }),
+    });
 
     const data = await response.json();
 
@@ -98,11 +100,15 @@ export default async function handler(req, res) {
 
     const answer = cleanAnswer(rawAnswer);
 
+    // خروجی استاندارد برای فرانت و ایتا
     return res.status(200).json({ ok: true, answer });
   } catch (err) {
     console.error("Internal error:", err);
     return res
       .status(500)
-      .json({ ok: false, error: "خطای داخلی سرور. کمی بعد دوباره تلاش کن." });
+      .json({
+        ok: false,
+        error: "خطای داخلی سرور. کمی بعد دوباره تلاش کن.",
+      });
   }
 }
