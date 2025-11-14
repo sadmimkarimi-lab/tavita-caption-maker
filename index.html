@@ -54,7 +54,7 @@
       padding: 14px 18px 26px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: space-between; /* اینجا فقط اصلاح شد */
       gap: 12px;
       box-shadow: 0 14px 30px rgba(37, 99, 235, 0.35);
       border-radius: 0 0 24px 24px;
@@ -134,33 +134,6 @@
       display: block;
     }
 
-    .scroll-indicator {
-      position: absolute;
-      bottom: -12px;
-      left: 50%;
-      transform: translate(-50%, 0);
-      width: 26px;
-      height: 26px;
-      border-radius: 999px;
-      background: #eff6ff;
-      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: bounce-down 1.6s infinite;
-      pointer-events: none;
-    }
-
-    .scroll-indicator span {
-      font-size: 16px;
-      color: #1d4ed8;
-    }
-
-    @keyframes bounce-down {
-      0%, 100% { transform: translate(-50%, 0); }
-      50% { transform: translate(-50%, 4px); }
-    }
-
     /* MAIN */
 
     .main {
@@ -232,12 +205,59 @@
       background: #2563eb;
     }
 
+    /* mode buttons (سه دکمه‌ی انتخاب بخش‌ها) */
+
+    .mode-switch {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .mode-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      text-align: right;
+      background: #e5edff;
+      color: #1d4ed8;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      box-shadow: 0 4px 10px rgba(148, 163, 184, 0.35);
+      transition: background 0.15s, transform 0.08s, box-shadow 0.12s;
+    }
+
+    .mode-btn span.label {
+      font-weight: 600;
+    }
+
+    .mode-btn span.icon {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .mode-btn.active {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.45);
+    }
+
+    .mode-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 3px 8px rgba(15, 23, 42, 0.35);
+    }
+
     /* Cards */
 
     .cards {
       display: grid;
       grid-template-columns: 1fr;
       gap: 10px;
+      margin-top: 6px;
     }
 
     .card {
@@ -246,9 +266,13 @@
       padding: 10px 12px;
       border: 1px solid #e0e7ff;
       box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
-      display: flex;
+      display: none; /* پیش‌فرض مخفی */
       flex-direction: column;
       gap: 8px;
+    }
+
+    .card.active {
+      display: flex; /* فقط کارت فعال دیده می‌شود */
     }
 
     .card-header {
@@ -405,7 +429,7 @@
       border-radius: 12px;
       background: #f9fafb;
       border: 1px dashed #cbd5f5;
-      padding: 8px 9px;
+      padding: 10px 10px 9px;
       font-size: 12px;
       color: #111827;
       min-height: 40px;
@@ -413,15 +437,40 @@
       line-height: 1.7;
     }
 
+    .result-header {
+      display: flex;
+      align-items: center;       /* دکمه و لیبل در یک خط مرتب */
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;        /* کمی فاصله از متن خروجی */
+    }
+
     .result-label {
       font-size: 10px;
       color: #6b7280;
-      margin-bottom: 4px;
     }
 
     .result-empty {
       font-size: 11px;
       color: #9ca3af;
+    }
+
+    .copy-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      background: #e5edff;
+      color: #1d4ed8;
+      cursor: pointer;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .copy-btn:active {
+      transform: translateY(1px);
     }
 
     .footer-tip {
@@ -480,10 +529,6 @@
       <span>فقط با چند کلیک</span>
       <span>بدون نیاز به نصب برنامه</span>
     </div>
-
-    <div class="scroll-indicator">
-      <span>⌄</span>
-    </div>
   </header>
 
   <!-- MAIN -->
@@ -519,10 +564,26 @@
       </div>
     </section>
 
+    <!-- دکمه‌های انتخاب بخش‌ها -->
+    <section class="mode-switch">
+      <button class="mode-btn active" data-mode-target="card-caption">
+        <span class="label">کپشن کامل برای پست</span>
+        <span class="icon">✍️</span>
+      </button>
+      <button class="mode-btn" data-mode-target="card-title">
+        <span class="label">تیتر و هوک برای شروع کپشن</span>
+        <span class="icon">💡</span>
+      </button>
+      <button class="mode-btn" data-mode-target="card-prompt">
+        <span class="label">پرامپت برای طراحی کاور / بنر</span>
+        <span class="icon">🎨</span>
+      </button>
+    </section>
+
     <!-- کارت‌ها -->
     <section class="cards">
       <!-- کارت ۱ -->
-      <article class="card" id="card-caption">
+      <article class="card active" id="card-caption">
         <div class="card-header">
           <div class="card-title-wrap">
             <div class="card-icon"></div>
@@ -641,7 +702,12 @@
         </div>
 
         <div class="result-box">
-          <div class="result-label">کپشن پیشنهادی طاویتا:</div>
+          <div class="result-header">
+            <div class="result-label">کپشن پیشنهادی طاویتا:</div>
+            <button type="button" class="copy-btn" data-copy-target="res-caption">
+              📋 کپی کپشن
+            </button>
+          </div>
           <div id="res-caption" class="result-empty">
             هنوز کپشنی ساخته نشده؛ ایده‌ات را بنویس و روی «ساخت کپشن» بزن.
           </div>
@@ -699,7 +765,12 @@
         </div>
 
         <div class="result-box">
-          <div class="result-label">خروجی تیترها:</div>
+          <div class="result-header">
+            <div class="result-label">خروجی تیترها:</div>
+            <button type="button" class="copy-btn" data-copy-target="res-title">
+              📋 کپی تیترها
+            </button>
+          </div>
           <div id="res-title" class="result-empty">
             اینجا لیستی از تیترهای پیشنهادی نمایش داده می‌شود.
           </div>
@@ -768,7 +839,12 @@
         </div>
 
         <div class="result-box">
-          <div class="result-label">خروجی پرامپت:</div>
+          <div class="result-header">
+            <div class="result-label">خروجی پرامپت:</div>
+            <button type="button" class="copy-btn" data-copy-target="res-prompt">
+              📋 کپی پرامپت
+            </button>
+          </div>
           <div id="res-prompt" class="result-empty">
             بعد از ساخت، اینجا توصیف کامل برای کاور/بنر نمایش داده می‌شود.
           </div>
@@ -818,6 +894,28 @@
       button.innerHTML = originalHtml;
     }
   }
+
+  // تعویض بخش‌ها با دکمه‌ها
+  (function setupModes() {
+    const buttons = document.querySelectorAll(".mode-btn");
+    const cards = document.querySelectorAll(".cards .card");
+
+    if (!buttons.length || !cards.length) return;
+
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const targetId = btn.getAttribute("data-mode-target");
+        if (!targetId) return;
+
+        buttons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        cards.forEach((card) => {
+          card.classList.toggle("active", card.id === targetId);
+        });
+      });
+    });
+  })();
 
   // کارت ۱: کپشن کامل
   const btnCaption = document.getElementById("btn-caption");
@@ -962,6 +1060,46 @@
       setLoading(btnPrompt, false, originalHtml);
     }
   });
+
+  // دکمه‌های کپی
+  (function setupCopyButtons() {
+    const buttons = document.querySelectorAll(".copy-btn");
+    if (!buttons.length) return;
+
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const targetId = btn.getAttribute("data-copy-target");
+        const el = document.getElementById(targetId);
+        if (!el) return;
+
+        const text = el.innerText.trim();
+        if (!text) return;
+
+        const original = btn.textContent;
+
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+          } else {
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+          }
+          btn.textContent = "✅ کپی شد";
+        } catch (err) {
+          console.error(err);
+          btn.textContent = "کپی نشد 😔";
+        } finally {
+          setTimeout(() => {
+            btn.textContent = original;
+          }, 1500);
+        }
+      });
+    });
+  })();
 </script>
 </body>
 </html>
