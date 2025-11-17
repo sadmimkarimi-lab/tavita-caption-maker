@@ -12,6 +12,13 @@ export default async function handler(req, res) {
       .json({ error: "GROQ_API_KEY در تنظیمات سرور تعریف نشده است." });
   }
 
+  // ✅ فقط این یکی اضافه شده: لیست چند مدل برای fallback
+  const GROQ_MODELS = [
+    "llama-3.3-70b-versatile", // اصلی
+    "llama-3.1-8b-instant",    // پشتیبان ۱
+    "mixtral-8x7b-32768",      // پشتیبان ۲
+  ];
+
   // بدنهٔ درخواست را بخوان
   let payload = req.body;
   if (typeof payload === "string") {
@@ -147,7 +154,7 @@ export default async function handler(req, res) {
    - چه عناصری در مرکز تصویر باشند؟
    - پس‌زمینه چگونه باشد؟ (ساده، شلوغ، بافت‌دار، استودیویی، محیط واقعی و...)
    - آیا متن روی تصویر وجود دارد یا نه؟ اگر بله، جای تقریبی متن و تیتر را به‌صورت کلی توضیح بده (بدون نوشتن متن دقیق).
-3. حس و استایل بصری را دقیقاً مطابق با "${visualStyle}" توضیح بده؛ مثلاً:
+3. حس و استایل بصری را دقیقا مطابق با "${visualStyle}" توضیح بده؛ مثلاً:
    - نوع رنگ‌ها (گرم/سرد، پاستلی، نئونی، خنثی و...)
    - میزان کنتراست، نورپردازی و حال‌وهوای کلی (شاد، جدی، رسمی، دوستانه، لوکس، تکنولوژیک و...).
 4. اگر در جزئیات مهم، موردی ذکر شده بود، آن‌ها را حتماً به‌عنوان اجزای ضروری در توضیح بیاور
@@ -164,40 +171,62 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "llama-3.1-70b-versatile",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt },
-          ],
-          temperature: mode === "hook" ? 0.9 : 0.75,
-          max_tokens: 1024,
-        }),
+    // ✅ این بخش عوض شده: حلقه روی چند مدل به‌جای یک مدل ثابت
+    let text = "";
+    let lastError = null;
+
+    for (const model of GROQ_MODELS) {
+      try {
+        const response = await fetch(
+          "https://api.groq.com/openai/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+              model,
+              messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: userPrompt },
+              ],
+              temperature: mode === "hook" ? 0.9 : 0.75,
+              max_tokens: 1024,
+            }),
+          }
+        );
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          console.error("Groq API error with model", model, data);
+          lastError = data;
+          continue; // برو مدل بعدی
+        }
+
+        text =
+          data.choices?.[0]?.message?.content?.trim() ||
+          "";
+
+        if (text) {
+          console.log("✅ Groq model used:", model);
+          break;
+        }
+      } catch (err) {
+        console.error("Groq request failed with model", model, err);
+        lastError = err;
+        continue;
       }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("Groq API error:", data);
-      return res.status(500).json({
-        error:
-          data.error?.message ||
-          "خطایی در ارتباط با سرویس مدل هوش مصنوعی رخ داد.",
-      });
     }
 
-    const text =
-      data.choices?.[0]?.message?.content?.trim() ||
-      "پاسخی از مدل دریافت نشد.";
+    if (!text) {
+      return res.status(500).json({
+        error:
+          lastError?.error?.message ||
+          "هیچ‌کدام از مدل‌های هوش مصنوعی نتوانستند پاسخ بدهند.",
+      });
+    }
 
     return res.status(200).json({
       mode,
