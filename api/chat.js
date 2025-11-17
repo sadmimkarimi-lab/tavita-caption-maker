@@ -14,29 +14,26 @@ function cleanAnswer(text) {
   // حداکثر دو خط خالی پشت سر هم
   t = t.replace(/\n{3,}/g, "\n\n");
 
-  // حذف فاصله‌های اضافه در انتهای هر خط
-  const lines = t.split("\n").map((line) => line.replace(/\s+$/g, ""));
-  return lines.join("\n");
+  return t;
 }
 
 export default async function handler(req, res) {
-  // فقط POST
   if (req.method !== "POST") {
-    return res.status(200).send("OK");
+    return res.status(405).json({ ok: false, error: "Only POST allowed." });
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    console.error("OPENAI_API_KEY تعریف نشده");
+    console.error("GROQ_API_KEY تعریف نشده است.");
     return res
       .status(500)
-      .json({ ok: false, error: "کلید OpenAI روی سرور تنظیم نشده است." });
+      .json({ ok: false, error: "کلید Groq روی سرور تنظیم نشده است." });
   }
 
-  // ورودی را از بدنه بخوانیم (چند حالت مختلف)
+  // ورودی را از بدنه بخوانیم (چند حالت مختلف مثل قبل)
   const userMessage =
-    req.body?.text ||      // فرانت کپشن‌ساز: { text: "..." }
-    req.body?.message ||   // اگر جایی { message: "..." } فرستاده شود
+    req.body?.text || // فرانت کپشن‌ساز: { text: "..." }
+    req.body?.message || // اگر جایی { message: "..." } فرستاده شود
     req.body?.message?.text || // حالت وبهوک شبیه ایتا
     null;
 
@@ -48,67 +45,66 @@ export default async function handler(req, res) {
 
   try {
     // هر درخواست مستقل است؛ بدون حافظه
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: `
-تو دستیار هوشمند فارسی‌زبان طاویتا هستی.
+    const response = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "llama-3.1-8b-instant",
+          temperature: 0.6,
+          max_tokens: 500,
+          messages: [
+            {
+              role: "system",
+              content: `
+تو یک دستیار تخصصی «تولید کپشن، تیتر و متن شبکه‌های اجتماعی» برای آکادمی طاویتا هستی.
+
+ماموریتت:
+- کمک به تولید کپشن حرفه‌ای، تیتر جذاب، CTA قوی، و پیشنهاد هشتگ‌های مناسب.
+- متن‌ها را طوری بنویس که برای اینستاگرام و شبکه‌های اجتماعی ایرانی مناسب باشد.
 
 قوانین:
 - هر درخواست را مستقل در نظر بگیر؛ به پیام‌های قبلی دسترسی نداری.
 - معمولاً کاربر از تو کپشن، متن، تیتر، ایده محتوا یا پرامپت برای طراحی می‌خواهد.
-- بر اساس بهترین اصول نگارش کپشن و متن شبکه‌های اجتماعی (هوک، بدنه، CTA، هشتگ‌های مناسب) جواب بده؛ مگر این‌که کاربر چیز دیگری خواسته باشد.
+- بر اساس بهترین اصول نگارش کپشن و متن شبکه‌های اجتماعی (هوک، بدنه جذاب، کال‌تو‌اکشن، هشتگ‌های مناسب) جواب بده؛ مگر این‌که کاربر چیز دیگری خواسته باشد.
 - اگر کاربر مشخصات دقیق داده (پلتفرم، لحن، هدف، مخاطب و...) حتماً آن‌ها را رعایت کن.
-- کوتاه، واضح و خوش‌خوان بنویس؛ از پاراگراف‌های خیلی بلند و پرحرفی خودداری کن.
-- اگر لازم بود، می‌توانی بولت‌پوینت (با - در ابتدای خط) استفاده کنی.
-- لحن: محترمانه، صمیمی و حرفه‌ای.
-            `.trim(),
-          },
-          {
-            role: "user",
-            content: userMessage,
-          },
-        ],
-        temperature: 0.6,
-        max_tokens: 500,
-      }),
-    });
-
-    const data = await response.json();
+- متن‌ها را واضح، خوش‌خوان و کاربردی بنویس؛ از پرحرفی و پاراگراف‌های خیلی طولانی خودداری کن.
+- در صورت نیاز می‌توانی از بولت‌پوینت استفاده کنی.
+- لحن: صمیمی، محترمانه و حرفه‌ای.
+              `.trim(),
+            },
+            {
+              role: "user",
+              content: userMessage,
+            },
+          ],
+        }),
+      }
+    );
 
     if (!response.ok) {
-      console.error("OpenAI error:", data);
-      const msg =
-        data?.error?.message ||
-        "پاسخی از OpenAI دریافت نشد، لطفاً دوباره تلاش کنید.";
-      return res
-        .status(500)
-        .json({ ok: false, error: `خطا از سمت OpenAI: ${msg}` });
+      const errorText = await response.text().catch(() => "");
+      console.error("Groq API error:", response.status, errorText);
+      return res.status(500).json({
+        ok: false,
+        error: "خطا در ارتباط با مدل هوش مصنوعی. کمی بعد دوباره امتحان کن.",
+      });
     }
 
-    const rawAnswer =
-      data?.choices?.[0]?.message?.content ||
-      "نتوانستم پاسخی تولید کنم، لطفاً دوباره تلاش کنید.";
-
+    const data = await response.json().catch(() => ({}));
+    const rawAnswer = data?.choices?.[0]?.message?.content || "";
     const answer = cleanAnswer(rawAnswer);
 
-    // خروجی استاندارد برای فرانت و ایتا
     return res.status(200).json({ ok: true, answer });
   } catch (err) {
     console.error("Internal error:", err);
-    return res
-      .status(500)
-      .json({
-        ok: false,
-        error: "خطای داخلی سرور. کمی بعد دوباره تلاش کن.",
-      });
+    return res.status(500).json({
+      ok: false,
+      error: "خطای داخلی سرور. کمی بعد دوباره تلاش کن.",
+    });
   }
 }
