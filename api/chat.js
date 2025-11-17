@@ -1,50 +1,169 @@
-// api/chat.js
-
-// تمیز کردن خروجی: کمی مرتب‌تر برای نمایش داخل حباب
-function cleanAnswer(text) {
-  if (!text || typeof text !== "string") {
-    return "نتوانستم پاسخی تولید کنم.";
-  }
-
-  let t = text.trim();
-
-  // نرمال‌سازی خط‌ها
-  t = t.replace(/\r\n/g, "\n");
-
-  // حداکثر دو خط خالی پشت سر هم
-  t = t.replace(/\n{3,}/g, "\n\n");
-
-  return t;
-}
+// pages/api/chat.js
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ ok: false, error: "Only POST allowed." });
+    return res.status(405).json({ error: "Method Not Allowed" });
   }
 
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    console.error("GROQ_API_KEY تعریف نشده است.");
     return res
       .status(500)
-      .json({ ok: false, error: "کلید Groq روی سرور تنظیم نشده است." });
+      .json({ error: "GROQ_API_KEY در تنظیمات سرور تعریف نشده است." });
   }
 
-  // ورودی را از بدنه بخوانیم (چند حالت مختلف مثل قبل)
-  const userMessage =
-    req.body?.text || // فرانت کپشن‌ساز: { text: "..." }
-    req.body?.message || // اگر جایی { message: "..." } فرستاده شود
-    req.body?.message?.text || // حالت وبهوک شبیه ایتا
-    null;
+  // بدنهٔ درخواست را بخوان
+  let payload = req.body;
+  if (typeof payload === "string") {
+    try {
+      payload = JSON.parse(payload);
+    } catch (e) {
+      return res.status(400).json({ error: "فرمت بدنهٔ درخواست معتبر نیست." });
+    }
+  }
 
-  if (!userMessage || typeof userMessage !== "string") {
-    return res
-      .status(400)
-      .json({ ok: false, error: "پیام کاربر ارسال نشده است." });
+  // mode از فرانت می‌آید: "caption" | "hook" | "cover"
+  // اگر نیامده باشد، سعی می‌کنیم از روی فیلدها حدس بزنیم
+  let mode = payload.mode || payload.section;
+
+  if (!mode) {
+    if (payload.mainTopic || payload.MAIN_TOPIC) {
+      mode = "cover";
+    } else if (payload.topic || payload.hookTopic || payload.subject) {
+      mode = "hook";
+    } else {
+      mode = "caption"; // پیش‌فرض
+    }
+  }
+
+  // برای امنیت، فقط سه مقدار مجاز
+  const allowedModes = ["caption", "hook", "cover"];
+  if (!allowedModes.includes(mode)) {
+    mode = "caption";
+  }
+
+  // ساخت پرامپت بر اساس mode
+  let userPrompt = "";
+  let systemPrompt =
+    "تو یک دستیار هوش مصنوعی فارسی‌زبان هستی. خروجی را فقط به زبان فارسی و تمیز و قابل کپی بنویس.";
+
+  if (mode === "caption") {
+    // -------- کپشن کامل برای پست --------
+    const idea = payload.idea || payload.IDEA || "";
+    const platform = payload.platform || payload.PLATFORM || "اینستاگرام";
+    const tone = payload.tone || payload.TONE || "صمیمی و محاوره‌ای";
+    const formality =
+      payload.formality || payload.FORMALITY || "نیمه‌رسمی و قابل فهم";
+    const goal = payload.goal || payload.GOAL || "جلب تعامل (کامنت و ذخیره)";
+    const length = payload.length || payload.LENGTH || "متوسط";
+    const audience =
+      payload.audience || payload.AUDIENCE || "عموم مردم و کسب‌وکارهای کوچک";
+
+    userPrompt = `
+تو یک کپی‌رایتر و استراتژیست حرفه‌ای شبکه‌های اجتماعی هستی.
+
+وظیفهٔ تو نوشتن یک «کپشن کامل و آمادهٔ انتشار» برای پستی است که من توضیح می‌دهم.
+کپشن باید خلاقانه، خوش‌خوان، طبیعی و شبیه یک کپشن حرفه‌ای اینستاگرامی باشد؛
+هم جذاب باشد، هم واضح و هم به هدفی که مشخص می‌کنم کمک کند.
+
+«اطلاعات ورودی کاربر»
+- ایده یا توضیح پست: ${idea}
+- پلتفرم: ${platform}
+- لحن متن: ${tone}
+- سطح رسمی بودن: ${formality}
+- هدف کپشن: ${goal}
+- طول متن: ${length}
+- مخاطب هدف: ${audience}
+
+«ساختار کپشن»
+1. خط اول باید یک هوک/جمله شروع خیلی جذاب و درگیرکننده باشد که کاربر را مجبور کند ادامه را بخواند.
+2. در ادامه، در ۲ تا ۴ پاراگراف کوتاه، موضوع را ساده و روان توضیح بده. از مثال، سؤال یا تجربه استفاده کن تا خواننده ارتباط بگیرد.
+3. براساس "${goal}" یک CTA کاملاً واضح و کاربردی اضافه کن؛ مثلاً دعوت به کامنت، ذخیره، اشتراک‌گذاری، خرید، پیام خصوصی و...
+4. در صورت مناسب بودن پلتفرم، در انتهای کپشن یک بلوک هشتگ مرتبط بنویس:
+   - اگر طول متن «کوتاه» است: ۵ تا ۸ هشتگ  
+   - اگر طول متن «متوسط» است: ۸ تا ۱۲ هشتگ  
+
+قوانین مهم:
+- تمام متن را به زبان فارسی روان و طبیعی بنویس.
+- از اموجی در حد معقول استفاده کن، نه در حد شلوغ شدن متن.
+- کپشن را طوری بنویس که کاربر فقط با کمی ویرایش بتواند مستقیم در پیجش منتشر کند.
+- خروجی فقط خود کپشن باشد؛ هیچ توضیح اضافی مثل «این کپشن است» قبل یا بعدش ننویس.
+    `;
+  } else if (mode === "hook") {
+    // -------- تیتر و هوک برای شروع کپشن --------
+    const topic =
+      payload.topic || payload.hookTopic || payload.subject || "موضوع دلخواه";
+    const style =
+      payload.style ||
+      payload.tone ||
+      "کوتاه، کنجکاوبرانگیز و متناسب با اینستاگرام";
+
+    userPrompt = `
+تو یک کپی‌رایتر خفن و متخصص نوشتن «تیتر و هوک» برای شبکه‌های اجتماعی هستی.
+
+«اطلاعات ورودی کاربر»
+- موضوع یا درد مخاطب: ${topic}
+- سبک تیتر: ${style}
+
+خروجی مورد انتظار:
+- ۱۰ تیتر/هوک خیلی جذاب و کوتاه برای شروع کپشن یا روی کاور پست.
+- هر تیتر حداکثر یک خط باشد و تا حد ممکن مشخص، کنجکاوبرانگیز و مربوط به موضوع باشد.
+- از کلی‌گویی و جملات تکراری مثل «فروش ندارم، حالا چی؟» تا حد امکان دوری کن؛ سعی کن خلاق، متفاوت و دقیق بنویسی.
+- می‌توانی در صورت مناسب بودن سبک، از اموجی محدود استفاده کنی، اما متن باید قابل استفاده روی کاور باشد.
+
+فرمت خروجی:
+۱. تیتر اول
+۲. تیتر دوم
+۳. تیتر سوم
+...
+۱۰. تیتر دهم
+
+فقط همین لیست تیترها را بنویس؛ هیچ توضیح اضافی قبل یا بعدش ننویس.
+    `;
+  } else if (mode === "cover") {
+    // -------- پرامپت برای طراحی کاور / بنر --------
+    const mainTopic = payload.mainTopic || payload.MAIN_TOPIC || "";
+    const details = payload.details || payload.DETAILS || "";
+    const visualStyle =
+      payload.visualStyle ||
+      payload.VISUAL_STYLE ||
+      "مدرن، مینیمال و خوانا برای شبکه‌های اجتماعی";
+
+    userPrompt = `
+تو یک طراح گرافیک خلاق و در عین حال «نویسندهٔ پرامپت حرفه‌ای» برای ابزارهای طراحی و هوش مصنوعی هستی
+(مثل Midjourney, DALL·E, Leonardo, Canva و ...).
+
+وظیفهٔ تو این است که بر اساس اطلاعات کاربر، یک «توضیح کامل و دقیق برای طراحی کاور/بنر» بسازی؛
+توضیحی که هم برای طراح گرافیک انسانی قابل فهم باشد و هم بتوان آن را مستقیماً به ابزارهای هوش مصنوعی داد.
+
+«اطلاعات ورودی کاربر»
+- موضوع و پیام اصلی تصویر: ${mainTopic}
+- جزئیات مهم و الزامی (اختیاری): ${details || "کاربر جزئیات خاصی ذکر نکرده است."}
+- حس و سبک بصری: ${visualStyle}
+
+«دستورالعمل ساخت پرامپت»
+1. ابتدا در یک یا دو جمله، موضوع اصلی و پیام تصویر را شفاف توضیح بده.
+2. ترکیب‌بندی کلی تصویر را توصیف کن؛ مثلاً:
+   - چه عناصری در مرکز تصویر باشند؟
+   - پس‌زمینه چگونه باشد؟ (ساده، شلوغ، بافت‌دار، استودیویی، محیط واقعی و...)
+   - آیا متن روی تصویر وجود دارد یا نه؟ اگر بله، جای تقریبی متن و تیتر را به‌صورت کلی توضیح بده (بدون نوشتن متن دقیق).
+3. حس و استایل بصری را دقیقاً مطابق با "${visualStyle}" توضیح بده؛ مثلاً:
+   - نوع رنگ‌ها (گرم/سرد، پاستلی، نئونی، خنثی و...)
+   - میزان کنتراست، نورپردازی و حال‌وهوای کلی (شاد، جدی، رسمی، دوستانه، لوکس، تکنولوژیک و...).
+4. اگر در جزئیات مهم، موردی ذکر شده بود، آن‌ها را حتماً به‌عنوان اجزای ضروری در توضیح بیاور
+   (مثلاً حضور لوگو، نمایش محصول، استفاده از یک نماد خاص، جای خالی برای متن و...).
+5. در انتها در یک خط کوتاه، فرمت و نسبت تصویر را پیشنهاد بده؛
+   مثلاً: «مناسب کاور پست اینستاگرام مربع ۱:۱» یا «کاور ریلز عمودی ۹:۱۶» یا «بنر افقی ۱۶:۹».
+
+قوانین مهم:
+- متن را به زبان فارسی روان و قابل فهم برای طراح بنویس.
+- از bullet point یا جمله‌های کوتاه پشت سر هم استفاده کن تا خواندنش برای طراح آسان باشد.
+- هیچ نمونه متن تبلیغاتی داخل تصویر ننویس (تیتر یا کپشن کامل ننویس)، فقط توضیح گرافیکی بده.
+- خروجی فقط همین «توضیح طراحی» باشد؛ هیچ جملهٔ اضافی مثل «این یک پرامپت است» قبل یا بعدش ننویس.
+    `;
   }
 
   try {
-    // هر درخواست مستقل است؛ بدون حافظه
     const response = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
       {
@@ -54,57 +173,40 @@ export default async function handler(req, res) {
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
-          temperature: 0.6,
-          max_tokens: 500,
+          model: "llama-3.1-70b-versatile",
           messages: [
-            {
-              role: "system",
-              content: `
-تو یک دستیار تخصصی «تولید کپشن، تیتر و متن شبکه‌های اجتماعی» برای آکادمی طاویتا هستی.
-
-ماموریتت:
-- کمک به تولید کپشن حرفه‌ای، تیتر جذاب، CTA قوی، و پیشنهاد هشتگ‌های مناسب.
-- متن‌ها را طوری بنویس که برای اینستاگرام و شبکه‌های اجتماعی ایرانی مناسب باشد.
-
-قوانین:
-- هر درخواست را مستقل در نظر بگیر؛ به پیام‌های قبلی دسترسی نداری.
-- معمولاً کاربر از تو کپشن، متن، تیتر، ایده محتوا یا پرامپت برای طراحی می‌خواهد.
-- بر اساس بهترین اصول نگارش کپشن و متن شبکه‌های اجتماعی (هوک، بدنه جذاب، کال‌تو‌اکشن، هشتگ‌های مناسب) جواب بده؛ مگر این‌که کاربر چیز دیگری خواسته باشد.
-- اگر کاربر مشخصات دقیق داده (پلتفرم، لحن، هدف، مخاطب و...) حتماً آن‌ها را رعایت کن.
-- متن‌ها را واضح، خوش‌خوان و کاربردی بنویس؛ از پرحرفی و پاراگراف‌های خیلی طولانی خودداری کن.
-- در صورت نیاز می‌توانی از بولت‌پوینت استفاده کنی.
-- لحن: صمیمی، محترمانه و حرفه‌ای.
-              `.trim(),
-            },
-            {
-              role: "user",
-              content: userMessage,
-            },
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
           ],
+          temperature: mode === "hook" ? 0.9 : 0.75,
+          max_tokens: 1024,
         }),
       }
     );
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const errorText = await response.text().catch(() => "");
-      console.error("Groq API error:", response.status, errorText);
+      console.error("Groq API error:", data);
       return res.status(500).json({
-        ok: false,
-        error: "خطا در ارتباط با مدل هوش مصنوعی. کمی بعد دوباره امتحان کن.",
+        error:
+          data.error?.message ||
+          "خطایی در ارتباط با سرویس مدل هوش مصنوعی رخ داد.",
       });
     }
 
-    const data = await response.json().catch(() => ({}));
-    const rawAnswer = data?.choices?.[0]?.message?.content || "";
-    const answer = cleanAnswer(rawAnswer);
+    const text =
+      data.choices?.[0]?.message?.content?.trim() ||
+      "پاسخی از مدل دریافت نشد.";
 
-    return res.status(200).json({ ok: true, answer });
-  } catch (err) {
-    console.error("Internal error:", err);
-    return res.status(500).json({
-      ok: false,
-      error: "خطای داخلی سرور. کمی بعد دوباره تلاش کن.",
+    return res.status(200).json({
+      mode,
+      text,
     });
+  } catch (err) {
+    console.error("API handler error:", err);
+    return res
+      .status(500)
+      .json({ error: "خطای غیرمنتظره در سرور رخ داد.", details: err.message });
   }
 }
