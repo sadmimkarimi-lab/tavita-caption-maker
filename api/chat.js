@@ -1,6 +1,6 @@
 // api/chat.js
 
-// تابع تمیز کردن خروجی: کمی مرتب‌تر برای نمایش داخل حباب / خروجی
+// تمیز کردن خروجی برای نمایش
 function cleanAnswer(text) {
   if (!text || typeof text !== "string") {
     return "نتوانستم پاسخی تولید کنم.";
@@ -14,153 +14,164 @@ function cleanAnswer(text) {
   // حداکثر دو خط خالی پشت سر هم
   t = t.replace(/\n{3,}/g, "\n\n");
 
-  // حذف فاصله‌های اضافه در انتهای هر خط
+  // حذف فاصله‌های اضافه‌ی آخر هر خط
   const lines = t.split("\n").map((line) => line.replace(/\s+$/g, ""));
   return lines.join("\n");
 }
 
 // مدل‌های Groq برای fallback
 const GROQ_MODELS = [
-  "llama-3.3-70b-versatile", // اصلی و باکیفیت‌تر
-  "llama-3.1-8b-instant",    // سریع و سبک
-  "mixtral-8x7b-32768",      // مدل جایگزین
+  "llama-3.3-70b-versatile", // اصلی و قوی
+  "llama-3.1-8b-instant",    // سریع و سبک‌تر
+  "mixtral-8x7b-32768",      // مدل سوم پشتیبان
 ];
 
-export default async function handler(req, res) {
-  // فقط POST
-  if (req.method !== "POST") {
-    return res.status(200).send("OK");
-  }
+// سیستم‌پرامپت فول‌حرفه‌ای برای کپشن، تیتر و پرامپت طراحی
+const SYSTEM_PROMPT = `
+تو دستیار هوشمند فارسی‌زبان «طاویتا» هستی و نقش تو کمک به تولید محتوای حرفه‌ای برای شبکه‌های اجتماعی است.
 
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    console.error("GROQ_API_KEY تعریف نشده");
-    return res
-      .status(500)
-      .json({ ok: false, error: "کلید Groq روی سرور تنظیم نشده است." });
-  }
+سه کار اصلی که معمولاً از تو می‌خواهند:
 
-  // ورودی را از بدنه بخوانیم (چند حالت مختلف)
-  const userMessage =
-    req.body?.text ||        // فرانت کپشن‌ساز: { text: "..." }
-    req.body?.message ||     // اگر جایی { message: "..." } فرستاده شود
-    req.body?.message?.text || // حالت وبهوک شبیه ایتا
-    null;
+۱) نوشتن «کپشن کامل و آماده انتشار» برای پست
+   - از این الگو استفاده کن (بدون این که خودت قالب را توضیح بدهی، فقط متن نهایی را تولید کن):
 
-  if (!userMessage || typeof userMessage !== "string") {
-    return res
-      .status(400)
-      .json({ ok: false, error: "پیام کاربر ارسال نشده است." });
-  }
+   *کپشن حرفه‌ای — نسخه‌ی فول:*
+   - خط اول: یک هوک خفن، کوتاه، ضربه‌ای و کاملاً اسکرول‌استاپر بنویس که کاربر را مجبور کند ادامه را بخواند.
+   - بدنه: در ۲ تا ۴ پاراگراف کوتاه، موضوع را ساده، انسانی و واقعی توضیح بده. از داستان‌گویی، سؤال، تضاد، مثال واقعی و تجربه‌ی ملموس استفاده کن.
+   - متن باید طبیعی، خوش‌خوان، صمیمی و شبیه یک آدم حرفه‌ای باشد؛ نه شبیه ربات.
+   - براساس هدف کپشن (تعامل، فروش، ذخیره، آگاهی‌رسانی و...) یک CTA کاملاً واضح و قابل اجرا بنویس
+     (مثلاً: «نظرت رو برام بنویس»، «این پست رو برای خودت ذخیره کن»، «برام پیام بده تا راهنماییت کنم» و…).
+   - اگر برای اینستاگرام / ایتاست، در انتها یک بلوک هشتگ هوشمند و مرتبط بنویس (حدود ۵ تا ۱۲ هشتگ، نه اسپم و بی‌ربط).
 
-  // سیستم‌پرامپت تقویت‌شده برای کپشن‌ساز + تیتر + پرامپت طراحی
-  const systemPrompt = `
-تو دستیار هوشمند فارسی‌زبان «طاویتا» هستی.
+۲) ساخت «تیتر و هوک‌های کوتاه و خفن» برای شروع کپشن یا روی کاور
+   - در این حالت معمولاً کاربر درباره «تیتر» یا «هوک» می‌پرسد.
+   - قانون:
+     - حداقل ۱۰ و حداکثر ۱۴ تیتر/هوک کوتاه بنویس.
+     - هر تیتر فقط در یک خط باشد.
+     - از تکنیک‌های کنجکاوی، تضاد، سؤال، FOMO، شوک، چالش، تجربه‌ی واقعی و تغییر زاویه دید استفاده کن.
+     - تیترها باید مناسب کاور ریلز و شروع کپشن باشند؛ یعنی کوتاه، تیز، قابل فهم و بدون کلی‌گویی.
+     - خروجی را به صورت لیست شماره‌دار بنویس (۱. … ۲. … ۳. …).
 
-کارهای اصلی که معمولاً از تو می‌خواهند:
-1) نوشتن کپشن کامل و حرفه‌ای برای شبکه‌های اجتماعی (ایتا، اینستاگرام و...)  
-   - با هوک خیلی جذاب در خط اول  
-   - بدنه‌ی روان، واضح و کاربردی  
-   - یک CTA (دعوت به اقدام) مشخص و عملی در انتها  
-   - هشتگ‌های مرتبط و مفید (نه خیلی زیاد، نه خیلی کم)
-
-2) پیشنهاد تیتر و هوک کوتاه و خفن برای شروع کپشن یا نوشتن روی کاور پست  
-   - هر تیتر در یک خط  
-   - کوتاه، دقیق و کنجکاوبرانگیز  
-   - بدون توضیح اضافه قبل و بعد
-
-3) نوشتن پرامپت دقیق برای طراحی کاور/بنر برای ابزارهای طراحی و هوش مصنوعی  
-   - توضیح شفاف موضوع تصویر  
-   - عناصر مهم در تصویر  
-   - سبک بصری، رنگ‌ها و حس کلی  
-   - پیشنهاد نسبت تصویر (مثلاً 1:1 برای پست، 9:16 برای ریلز/استوری)
+۳) نوشتن «پرامپت طراحی کاور/بنر» برای ابزارهای طراحی و هوش مصنوعی
+   - اگر کاربر در مورد طراحی، کاور، بنر، ریلز، استوری، یا پرامپت برای Midjourney / DALL·E / Leonardo سوال کرد:
+     - ابتدا در ۱–۲ جمله، موضوع و پیام اصلی تصویر را شفاف توضیح بده.
+     - سپس ترکیب‌بندی تصویر را توصیف کن:
+       - عنصر اصلی کجای تصویر باشد (مرکز، سمت راست/چپ، بالا/پایین…).
+       - نوع پس‌زمینه: ساده، گرادیان، واقعی، استودیویی، بافت‌دار، محیط فروشگاه، دفتر کار و…
+       - اگر قرار است متن روی تصویر باشد، فقط جای تقریبی آن را بگو (مثلاً: «فضای خالی برای تیتر در بالای تصویر»، بدون نوشتن خود متن).
+     - رنگ‌ها، سبک و فضای احساسی را دقیق توصیف کن:
+       - رنگ‌های گرم/سرد، نئونی، پاستلی، خنثی و…
+       - حس: دوستانه، رسمی، لوکس، تکنولوژیک، آموزشی، هیجان‌انگیز و…
+     - اگر کاربر جزئیات خاص داده (مثل حضور لوگو، نمایش محصول، ابزار، دستِ یک تعمیرکار و…) حتماً آن‌ها را به‌عنوان اجزای ضروری ذکر کن.
+     - در یک جمله‌ی آخر نسبت تصویر را مشخص کن (مثل: «مناسب کاور پست اینستاگرام مربع ۱:۱» یا «کاور ریلز/استوری عمودی ۹:۱۶»).
 
 قوانین کلی:
-- همیشه دقیقا طبق دستور و ساختاری که در «پیام کاربر» آمده عمل کن. اگر کاربر قالب، تعداد، یا مراحل مشخص کرد، همان را رعایت کن.
-- خروجی را فقط به همان زبانی بده که متن کاربر یا پرامپتی که به تو می‌رسد درخواست کرده؛ اغلب «فارسی» و گاهی «انگلیسی برای پرامپت طراحی».
-- متن را خوش‌خوان، تمیز، منظم و آماده‌ی کپی‌پیست بنویس؛ از توضیح اضافهٔ متای مثل «این یک کپشن است» یا «این‌ها تیترها هستند» خودداری کن، مگر خود متن ورودی خواسته باشد.
-- از حاشیه رفتن، نصیحت اضافه و جملات کلی و تکراری پرهیز کن. روی نتیجه‌ی کاربردی و حرفه‌ای تمرکز کن.
-- اگر ورودی درباره‌ی کپشن است روی هوک، بدنه و CTA تمرکز کن؛ اگر درباره‌ی تیتر است فقط تیترهای کوتاه و خلاق بده؛ اگر درباره‌ی پرامپت طراحی است فقط توضیح تصویری دقیق ارائه کن.
+- فقط همان چیزی را تولید کن که از تو خواسته شده: اگر کپشن خواست، کپشن کامل؛ اگر تیتر خواست، فقط تیترها؛ اگر پرامپت طراحی خواست، فقط توضیح طراحی.
+- زبان پیش‌فرض فارسی روان و طبیعی است، مگر کاربر صراحتاً انگلیسی بخواهد (مثلاً برای پرامپت Midjourney).
+- از توضیح متا (مثل: «در ادامه کپشن پیشنهادی» یا «این پرامپت است») خودداری کن؛ خروجی باید آماده‌ی کپی‌پیست باشد.
+- از جملات تکراری و کلیشه‌ای زیاد استفاده نکن؛ برای هر درخواست سعی کن کمی خلاقیت و زاویه‌ی دید جدید اضافه کنی.
+- لحن و میزان رسمی‌بودن را از لحن خود کاربر و کلماتی که استفاده کرده متوجه شو و مطابق همان بنویس.
 `.trim();
 
-  try {
-    let rawAnswer = null;
-    let lastError = null;
+// تابع تماس با Groq با fallback بین چند مدل
+async function askGroq(userMessage) {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    console.error("GROQ_API_KEY تنظیم نشده است.");
+    return "کلید اتصال به سرویس هوش مصنوعی تنظیم نشده است. لطفاً با مدیر سرویس تماس بگیر.";
+  }
 
-    // حلقه‌ی fallback روی چند مدل Groq
-    for (const model of GROQ_MODELS) {
-      try {
-        console.log("Calling Groq model:", model);
+  let lastError = null;
 
-        const response = await fetch(
-          "https://api.groq.com/openai/v1/chat/completions",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({
-              model,
-              messages: [
-                {
-                  role: "system",
-                  content: systemPrompt,
-                },
-                {
-                  role: "user",
-                  content: userMessage,
-                },
-              ],
-              temperature: 0.7,
-              max_tokens: 800,
-            }),
-          }
-        );
+  for (const model of GROQ_MODELS) {
+    try {
+      console.log("Calling Groq model:", model);
 
-        const data = await response.json().catch(() => ({}));
-
-        if (!response.ok) {
-          console.error("Groq error on model", model, data);
-          lastError =
-            data?.error?.message ||
-            `Groq API error with model ${model}`;
-          // برو سراغ مدل بعدی
-          continue;
+      const response = await fetch(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: "system", content: SYSTEM_PROMPT },
+              { role: "user", content: userMessage },
+            ],
+            temperature: 0.7,
+            max_tokens: 900,
+          }),
         }
+      );
 
-        rawAnswer =
-          data?.choices?.[0]?.message?.content ||
-          null;
+      const data = await response.json().catch(() => ({}));
 
-        if (rawAnswer) {
-          console.log("Groq model used successfully:", model);
-          break; // از حلقه بیا بیرون، چون جواب گرفتیم
-        }
-      } catch (err) {
-        console.error("Groq request failed on model", model, err);
-        lastError = err?.message || String(err);
+      if (!response.ok) {
+        console.error("Groq error on model", model, data);
+        lastError = data?.error?.message || `خطا در مدل ${model}`;
         // می‌رویم سراغ مدل بعدی
         continue;
       }
+
+      const rawAnswer = data?.choices?.[0]?.message?.content;
+      if (rawAnswer && typeof rawAnswer === "string") {
+        console.log("Groq model used successfully:", model);
+        return cleanAnswer(rawAnswer);
+      } else {
+        lastError = "پاسخی از مدل دریافت نشد.";
+      }
+    } catch (err) {
+      console.error("Groq request failed on model", model, err);
+      lastError = err?.message || String(err);
+      // می‌رویم سراغ مدل بعدی
+      continue;
+    }
+  }
+
+  // اگر هیچ مدلی جواب نداد:
+  return (
+    lastError ||
+    "در حال حاضر سرویس هوش مصنوعی در دسترس نیست. لطفاً چند دقیقه بعد دوباره امتحان کن."
+  );
+}
+
+// هندلر اصلی API
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    // برای سلامت، روی GET یک جواب ساده بده
+    return res.status(200).send("OK");
+  }
+
+  try {
+    const body = req.body || {};
+
+    const userMessage =
+      body.text ||               // حالت کپشن‌ساز: { text: "..." }
+      body.message ||            // اگر جایی { message: "..." } فرستاده شود
+      (body.message && body.message.text) || // حالت وبهوک‌گونه
+      null;
+
+    if (!userMessage || typeof userMessage !== "string") {
+      return res.status(400).json({
+        ok: false,
+        error: "متن پیام دریافت نشد. لطفاً دوباره تلاش کن.",
+      });
     }
 
-    if (!rawAnswer) {
-      const msg =
-        lastError ||
-        "هیچ‌کدام از مدل‌های Groq نتوانستند پاسخ بدهند. لطفاً کمی بعد دوباره تلاش کنید.";
-      return res.status(500).json({ ok: false, error: msg });
-    }
+    const answer = await askGroq(userMessage);
 
-    const answer = cleanAnswer(rawAnswer);
-
-    // خروجی استاندارد برای فرانت و ایتا (تغییر نکرده)
-    return res.status(200).json({ ok: true, answer });
+    return res.status(200).json({
+      ok: true,
+      answer,
+    });
   } catch (err) {
-    console.error("Internal error:", err);
+    console.error("Internal error in /api/chat:", err);
     return res.status(500).json({
       ok: false,
-      error: "خطای داخلی سرور. کمی بعد دوباره تلاش کن.",
+      error: "خطای داخلی سرور. لطفاً کمی بعد دوباره تلاش کن.",
     });
   }
 }
