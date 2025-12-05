@@ -7,6 +7,7 @@
 
   <!-- فونت وزیر -->
   <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn/Vazirmatn-font-face.css" rel="stylesheet" />
+  <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
 
   <style>
     :root {
@@ -14,9 +15,11 @@
       --blue-soft: #e0edff;
       --bg-page: #f4f7ff;
       --text-main: #0f172a;
-      --text-muted: #6b7280;
+      --text-muted: #64748b;
+      --card-bg: #ffffff;
+      --radius-xl: 22px;
       --radius-lg: 18px;
-      --radius-xl: 24px;
+      --radius-md: 12px;
     }
 
     * {
@@ -39,11 +42,15 @@
 
     .app {
       width: 100%;
-      max-width: 900px;
+      max-width: 980px;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      background: linear-gradient(145deg, #f9fbff, #eef4ff);
+      padding-bottom: 20px;
+    }
+
+    .app-inner {
+      padding: 10px 10px 20px;
     }
 
     /* HEADER */
@@ -64,18 +71,18 @@
     .header-main {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .logo-wrap {
-      width: 48px;
-      height: 48px;
+      width: 46px;
+      height: 46px;
       border-radius: 999px;
       background: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.4);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.6);
       overflow: hidden;
       flex-shrink: 0;
     }
@@ -84,7 +91,6 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      display: block;
     }
 
     .header-texts {
@@ -101,7 +107,6 @@
 
     .header-subtitle {
       font-size: 11px;
-      opacity: 0.95;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -124,27 +129,38 @@
     }
 
     .header-side {
-      font-size: 11px;
-      text-align: left;
-      opacity: 0.95;
-      line-height: 1.7;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
     }
 
-    .header-side span {
-      display: block;
+    .tavita-channel-btn {
+      border: none;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: linear-gradient(135deg, #facc15, #f97316);
+      color: #111827;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(250, 204, 21, 0.5);
+      white-space: nowrap;
+    }
+
+    .tavita-channel-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 3px 8px rgba(250, 204, 21, 0.7);
     }
 
     /* MAIN */
 
     .main {
       flex: 1;
-      padding: 22px 14px 12px;
+      padding: 12px 10px 0;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
+      background: linear-gradient(145deg, #f9fbff, #eef4ff);
     }
-
-    /* Intro card */
 
     .intro-card {
       background: linear-gradient(135deg, #e0edff, #eef4ff);
@@ -174,6 +190,51 @@
       margin-bottom: 8px;
     }
 
+    .intro-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .intro-toggle-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      background: rgba(37, 99, 235, 0.08);
+      color: #1e3a8a;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+      white-space: nowrap;
+    }
+
+    .intro-toggle-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.45);
+    }
+
+    .intro-body {
+      margin-top: 8px;
+    }
+
+    .intro-body--collapsed {
+      display: none;
+    }
+
+    .intro-close-btn {
+      margin-top: 8px;
+      border: none;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 10px;
+      cursor: pointer;
+      background: rgba(15, 23, 42, 0.08);
+      color: #0f172a;
+      white-space: nowrap;
+    }
+
     .intro-text b {
       color: #1d4ed8;
       font-weight: 700;
@@ -187,10 +248,10 @@
     }
 
     .intro-pill {
-      font-size: 11px;
-      padding: 6px 8px;
+      background: #e0edff;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.9);
+      padding: 6px 10px;
+      font-size: 11px;
       color: #1e40af;
       display: inline-flex;
       align-items: center;
@@ -209,9 +270,9 @@
 
     .mode-switch {
       margin-top: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
     }
 
     .mode-btn {
@@ -226,74 +287,67 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      box-shadow: 0 4px 10px rgba(148, 163, 184, 0.35);
-      transition: background 0.15s, transform 0.08s, box-shadow 0.12s;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(148, 163, 184, 0.45);
     }
 
-    .mode-btn span.label {
-      font-weight: 600;
+    .mode-btn .label {
+      flex: 1;
     }
 
-    .mode-btn span.icon {
-      font-size: 14px;
-      opacity: 0.9;
+    .mode-btn .icon {
+      font-size: 16px;
     }
 
     .mode-btn.active {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
       color: #ffffff;
-      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.45);
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.6);
     }
 
-    .mode-btn:active {
-      transform: translateY(1px);
-      box-shadow: 0 3px 8px rgba(15, 23, 42, 0.35);
-    }
-
-    /* Cards */
+    /* cards */
 
     .cards {
+      margin-top: 10px;
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-top: 6px;
+      grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.1fr);
+      gap: 12px;
     }
 
-    .card {
-      background: #ffffff;
+    .cards .card {
+      background: var(--card-bg);
       border-radius: var(--radius-xl);
-      padding: 10px 12px;
-      border: 1px solid #e0e7ff;
-      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
-      display: none; /* پیش‌فرض مخفی */
+      padding: 14px 12px 14px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      display: none;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
-    .card.active {
-      display: flex; /* فقط کارت فعال دیده می‌شود */
+    .cards .card.active {
+      display: flex;
     }
 
     .card-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 10px;
     }
 
     .card-title-wrap {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
 
     .card-icon {
-      width: 18px;
-      height: 18px;
+      width: 30px;
+      height: 30px;
       border-radius: 999px;
-      border: 2px solid #bfdbfe;
-      background: #dbeafe;
+      background: radial-gradient(circle at 30% 20%, #eff6ff, #2563eb);
+      box-shadow: 0 8px 18px rgba(59, 130, 246, 0.6);
     }
 
     .card-title-text {
@@ -301,158 +355,153 @@
       font-weight: 700;
     }
 
-    .card-chip {
-      font-size: 10px;
-      padding: 3px 7px;
-      border-radius: 999px;
-      background: #eff6ff;
-      color: #1d4ed8;
-    }
-
-    .card-desc {
+    .card-subtitle {
       font-size: 11px;
       color: var(--text-muted);
-      line-height: 1.8;
+    }
+
+    .chip {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+      white-space: nowrap;
+    }
+
+    .card-body {
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .field-row {
       display: flex;
       flex-direction: column;
       gap: 4px;
-      margin-top: 4px;
+      margin-bottom: 4px;
     }
 
     .field-label {
       font-size: 11px;
-      font-weight: 600;
-      color: #1f2937;
+      color: #475569;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
     }
 
     .field-label span {
-      font-size: 13px;
-    }
-
-    .field-helper {
-      font-size: 10px;
-      color: #9ca3af;
+      font-size: 14px;
     }
 
     .field-input,
     .field-textarea,
     .field-select {
       width: 100%;
-      border-radius: 10px;
-      border: 1px solid #d1d5db;
-      padding: 7px 8px;
-      font-size: 12px;
       font-family: inherit;
-      background: #f9fafb;
-      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+      font-size: 12px;
+      border-radius: 12px;
+      border: 1px solid #cbd5f5;
+      padding: 7px 10px;
+      outline: none;
+      background: #f8fafc;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     }
 
     .field-textarea {
-      min-height: 60px;
       resize: vertical;
+      min-height: 44px;
+      max-height: 140px;
     }
 
     .field-select {
-      cursor: pointer;
+      background: #f8fafc;
     }
 
     .field-input:focus,
     .field-textarea:focus,
     .field-select:focus {
-      outline: none;
       border-color: #2563eb;
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.35);
       background: #ffffff;
-      box-shadow: 0 0 0 1px #bfdbfe;
     }
 
-    .two-cols {
+    .row-two {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 8px;
+    }
+
+    .field-hint {
+      font-size: 10px;
+      color: #94a3b8;
     }
 
     .actions-row {
+      margin-top: 4px;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-top: 6px;
       flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
     }
 
     .generate-btn {
-      flex: 1;
       border: none;
+      padding: 7px 14px;
       border-radius: 999px;
-      padding: 8px 12px;
       font-size: 12px;
-      font-weight: 600;
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: #ffffff;
+      background: radial-gradient(circle at top left, #22c55e, #16a34a);
+      color: #ecfdf3;
       cursor: pointer;
-      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.35);
       display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 6px;
-      transition: transform 0.08s, box-shadow 0.1s, filter 0.1s;
+      box-shadow: 0 10px 24px rgba(22, 163, 74, 0.6);
     }
 
     .generate-btn:disabled {
       opacity: 0.7;
       cursor: default;
-      box-shadow: 0 6px 16px rgba(148, 163, 184, 0.35);
-    }
-
-    .generate-btn:not(:disabled):active {
-      transform: translateY(1px);
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+      box-shadow: none;
     }
 
     .generate-btn span {
       font-size: 14px;
     }
 
+    .generate-btn:hover:not(:disabled) {
+      filter: brightness(1.05);
+    }
+
     .note-text {
       font-size: 10px;
-      color: #9ca3af;
+      color: #94a3b8;
     }
 
     .result-box {
       margin-top: 8px;
-      border-radius: 12px;
-      background: #f9fafb;
+      border-radius: var(--radius-lg);
       border: 1px dashed #cbd5f5;
-      padding: 10px 10px 9px;
-      font-size: 12px;
-      color: #111827;
-      min-height: 40px;
-      white-space: pre-wrap;
-      line-height: 1.7;
+      background: #f8fafc;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
     .result-header {
       display: flex;
-      align-items: center;       /* دکمه و لیبل در یک خط مرتب */
+      align-items: center;
       justify-content: space-between;
       gap: 8px;
-      margin-bottom: 6px;        /* کمی فاصله از متن خروجی */
     }
 
     .result-label {
-      font-size: 10px;
-      color: #6b7280;
-    }
-
-    .result-empty {
       font-size: 11px;
-      color: #9ca3af;
+      font-weight: 600;
+      color: #1e293b;
     }
 
     .copy-btn {
@@ -460,646 +509,739 @@
       border-radius: 999px;
       padding: 4px 10px;
       font-size: 11px;
-      background: #e5edff;
-      color: #1d4ed8;
       cursor: pointer;
-      white-space: nowrap;
+      background: #e0f2fe;
+      color: #0369a1;
       display: inline-flex;
       align-items: center;
       gap: 4px;
     }
 
-    .copy-btn:active {
-      transform: translateY(1px);
+    .res-box {
+      font-size: 12px;
+      line-height: 1.9;
+      color: #0f172a;
+      white-space: pre-wrap;
+      direction: rtl;
     }
 
-    .footer-tip {
-      padding: 6px 14px 10px;
-      font-size: 10px;
-      color: #6b7280;
+    /* ستون کناری (راست) */
+
+    .side-column {
       display: flex;
-      justify-content: space-between;
-      gap: 6px;
-      border-top: 1px solid #e5e7eb;
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 24px 24px 0 0;
+      flex-direction: column;
+      gap: 10px;
     }
 
-    .footer-tip b {
-      color: #1d4ed8;
-      font-weight: 600;
+    .side-card {
+      background: #f9fafb;
+      border-radius: var(--radius-lg);
+      padding: 8px 10px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+      font-size: 11px;
+      color: #4b5563;
     }
 
-    @media (max-width: 640px) {
-      .intro-bullets {
-        grid-template-columns: 1fr;
+    .side-card-title {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #111827;
+    }
+
+    .footer-note {
+      margin-top: 10px;
+      font-size: 10px;
+      text-align: center;
+      color: #94a3b8;
+    }
+
+    /* ریسپانسیو */
+
+    @media (max-width: 800px) {
+      .cards {
+        grid-template-columns: minmax(0, 1fr);
       }
+
       .app-header {
-        padding-inline: 12px;
+        align-items: flex-start;
       }
-      .main {
-        padding-inline: 10px;
+    }
+
+    @media (max-width: 480px) {
+      .app-header {
+        padding: 12px 12px 20px;
+      }
+
+      .header-title {
+        font-size: 18px;
       }
     }
   </style>
 </head>
-
 <body>
-<div class="app">
-  <!-- HEADER -->
-  <header class="app-header">
-    <div class="header-main">
-      <div class="logo-wrap">
-        <img
-          src="https://cdnfa.com/irangiah/a9be/uploads/list1401/picsart-25-11-14-03-02-41-562.png"
-          alt="لوگوی طاویتا"
-        />
-      </div>
-      <div class="header-texts">
-        <div class="header-title">کپشن‌ساز طاویتا</div>
-        <div class="header-subtitle">
-          <div class="subtitle-dot"></div>
-          <span>دستیار هوشمند تولید محتوا در ایتا</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="header-side">
-      <span>کپشن حرفه‌ای</span>
-      <span>فقط با چند کلیک</span>
-      <span>بدون نیاز به نصب برنامه</span>
-    </div>
-  </header>
-
-  <!-- MAIN -->
-  <main class="main">
-    <!-- معرفی -->
-    <section class="intro-card">
-      <div class="intro-title">
-        <span>✨</span>
-        سازنده کپشن برای جذب، فروش و وایرال‌شدن
-      </div>
-      <div class="intro-text">
-        این برنامک بر اساس <b>اصول نگارش کپشن حرفه‌ای</b> برای شبکه‌های اجتماعی طراحی شده؛
-        از ساخت تیترهای جذاب تا کپشن کامل و CTA دقیق. هر بار که روی «ساخت کپشن» می‌زنی،
-        طاویتا سعی می‌کند متنی بسازد که:
-      </div>
-      <div class="intro-bullets">
-        <div class="intro-pill">
-          <span class="intro-pill-dot"></span>
-          موندگاری و تعامل (کامنت، ذخیره و اشتراک‌گذاری) را بالا ببرد
-        </div>
-        <div class="intro-pill">
-          <span class="intro-pill-dot"></span>
-          کمک کند محتوایت شانس وایرال شدن بیشتری داشته باشد
-        </div>
-        <div class="intro-pill">
-          <span class="intro-pill-dot"></span>
-          روی اعتماد، تبدیل و فروش تمرکز کند
-        </div>
-        <div class="intro-pill">
-          <span class="intro-pill-dot"></span>
-          با لحن و مخاطب برند تو هماهنگ باشد
-        </div>
-      </div>
-    </section>
-
-    <!-- دکمه‌های انتخاب بخش‌ها -->
-    <section class="mode-switch">
-      <button class="mode-btn active" data-mode-target="card-caption">
-        <span class="label">کپشن کامل برای پست</span>
-        <span class="icon">✍️</span>
-      </button>
-      <button class="mode-btn" data-mode-target="card-title">
-        <span class="label">تیتر و هوک برای شروع کپشن</span>
-        <span class="icon">💡</span>
-      </button>
-      <button class="mode-btn" data-mode-target="card-prompt">
-        <span class="label">پرامپت برای طراحی کاور / بنر</span>
-        <span class="icon">🎨</span>
-      </button>
-    </section>
-
-    <!-- کارت‌ها -->
-    <section class="cards">
-      <!-- کارت ۱ -->
-      <article class="card active" id="card-caption">
-        <div class="card-header">
-          <div class="card-title-wrap">
-            <div class="card-icon"></div>
-            <div class="card-title-text">کپشن کامل برای پست</div>
-          </div>
-          <div class="card-chip">کپشن + CTA + هشتگ</div>
-        </div>
-
-        <p class="card-desc">
-          زمانی که می‌خواهی یک کپشن کامل، خوش‌خوان و آماده‌انتشار داشته باشی از این بخش استفاده کن.
-          ایده پست را بنویس و تنظیمات را انتخاب کن تا طاویتا یک کپشن هدفمند بسازد.
-        </p>
-
-        <div class="field-row">
-          <label class="field-label">
-            <span>•</span> ایده یا توضیح پست
-          </label>
-          <textarea
-            id="cap-idea"
-            class="field-textarea"
-            placeholder="مثلاً: معرفی یک دوره آموزش هوش مصنوعی برای نوجوان‌ها، تأکید روی ساده بودن و کاربردی بودن دوره..."
-          ></textarea>
-          <div class="field-helper">
-            پیشنهاد: هم موضوع، هم مخاطب و هم هدف پست را بنویس تا کپشن دقیق‌تر و کاربردی‌تر بشود.
-          </div>
-        </div>
-
-        <div class="two-cols">
-          <div class="field-row">
-            <label class="field-label">
-              <span>•</span> پلتفرم
-            </label>
-            <select id="cap-platform" class="field-select">
-              <option value="ایتا">ایتا</option>
-              <option value="اینستاگرام">اینستاگرام</option>
-              <option value="تلگرام">تلگرام</option>
-              <option value="لینکدین">لینکدین</option>
-              <option value="واتساپ یا پیام‌رسان دیگر">واتساپ یا پیام‌رسان دیگر</option>
-            </select>
-          </div>
-
-          <div class="field-row">
-            <label class="field-label">
-              <span>•</span> لحن متن
-            </label>
-            <select id="cap-tone" class="field-select">
-              <option value="تبلیغاتی و فروش">تبلیغاتی و فروش</option>
-              <option value="آموزشی و مفید">آموزشی و مفید</option>
-              <option value="صمیمی و خودمونی">صمیمی و خودمونی</option>
-              <option value="رسمی و سازمانی">رسمی و سازمانی</option>
-              <option value="الهام‌بخش و انگیزشی">الهام‌بخش و انگیزشی</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="two-cols">
-          <div class="field-row">
-            <label class="field-label">
-              <span>•</span> هدف کپشن
-            </label>
-            <select id="cap-goal" class="field-select">
-              <option value="جلب تعامل (کامنت و ذخیره)">جلب تعامل (کامنت و ذخیره)</option>
-              <option value="فروش و جذب مشتری">فروش و جذب مشتری</option>
-              <option value="آگاهی از برند">آگاهی از برند</option>
-              <option value="هدایت به لینک یا ربات">هدایت به لینک یا ربات</option>
-              <option value="اطلاع‌رسانی ساده">اطلاع‌رسانی ساده</option>
-            </select>
-          </div>
-
-          <div class="field-row">
-            <label class="field-label">
-              <span>•</span> سطح رسمی بودن
-            </label>
-            <select id="cap-formality" class="field-select">
-              <option value="دوستانه و خودمانی">دوستانه و خودمانی</option>
-              <option value="نیمه‌رسمی">نیمه‌رسمی</option>
-              <option value="کاملاً رسمی">کاملاً رسمی</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="two-cols">
-          <div class="field-row">
-            <label class="field-label">
-              <span>•</span> مخاطب هدف
-            </label>
-            <select id="cap-audience" class="field-select">
-              <option value="عموم مردم">عموم مردم</option>
-              <option value="مشتریان فعلی">مشتریان فعلی</option>
-              <option value="مشتریان بالقوه">مشتریان بالقوه</option>
-              <option value="متخصصان و شاغلان حوزه">متخصصان و شاغلان حوزه</option>
-              <option value="مخاطبان جوان و نوجوان">مخاطبان جوان و نوجوان</option>
-            </select>
-          </div>
-
-          <div class="field-row">
-            <label class="field-label">
-              <span>•</span> طول متن
-            </label>
-            <select id="cap-length" class="field-select">
-              <option value="کوتاه">کوتاه</option>
-              <option value="متوسط">متوسط</option>
-              <option value="بلندتر و توضیحی">بلندتر و توضیحی</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="actions-row">
-          <button class="generate-btn" id="btn-caption">
-            <span>✨</span>
-            <span>ساخت کپشن</span>
-          </button>
-          <div class="note-text">
-            کپشن خروجی را قبل از انتشار حتماً با لحن خودت تنظیم و شخصی‌سازی کن.
-          </div>
-        </div>
-
-        <div class="result-box">
-          <div class="result-header">
-            <div class="result-label">کپشن پیشنهادی طاویتا:</div>
-            <button type="button" class="copy-btn" data-copy-target="res-caption">
-              📋 کپی کپشن
-            </button>
-          </div>
-          <div id="res-caption" class="result-empty">
-            هنوز کپشنی ساخته نشده؛ ایده‌ات را بنویس و روی «ساخت کپشن» بزن.
-          </div>
-        </div>
-      </article>
-
-      <!-- کارت ۲ -->
-      <article class="card" id="card-title">
-        <div class="card-header">
-          <div class="card-title-wrap">
-            <div class="card-icon"></div>
-            <div class="card-title-text">تیتر و هوک برای شروع کپشن</div>
-          </div>
-          <div class="card-chip">تیترهای کوتاه و ضربه‌ای</div>
-        </div>
-
-        <p class="card-desc">
-          چند تیتر کوتاه و جذاب برای اول کپشن یا روی کاور پستت بگیر؛ طوری که اسکرول کاربر را متوقف کند.
-        </p>
-
-        <div class="field-row">
-          <label class="field-label">
-            <span>•</span> موضوع یا درد مخاطب
-          </label>
-          <input
-            id="title-topic"
-            class="field-input"
-            placeholder="مثلاً: مشکل نداشتن فروش در پیج اینستاگرام با فالوور کم"
+  <div class="app">
+    <header class="app-header">
+      <div class="header-main">
+        <div class="logo-wrap">
+          <img
+            src="https://cdnfa.com/irangiah/a9be/uploads/list1401/picsart-25-11-14-03-02-41-562.png"
+            alt="لوگوی طاویتا"
           />
-          <div class="field-helper">
-            از زبان مخاطبت بگو مشکلش چیه، یا چه چیزی براش جذابه.
+        </div>
+        <div class="header-texts">
+          <div class="header-title">کپشن‌ساز طاویتا</div>
+          <div class="header-subtitle">
+            <div class="subtitle-dot"></div>
+            <span>دستیار هوشمند تولید محتوا در ایتا</span>
           </div>
         </div>
+      </div>
 
-        <div class="field-row">
-          <label class="field-label">
-            <span>•</span> سبک تیتر
-          </label>
-          <select id="title-style" class="field-select">
-            <option value="کوتاه و کنجکاوبرانگیز">کوتاه و کنجکاوبرانگیز</option>
-            <option value="مستقیم و شفاف">مستقیم و شفاف</option>
-            <option value="لیستی (چند راهکار)">لیستی (چند راهکار)</option>
-            <option value="با عدد و آمار">با عدد و آمار</option>
-          </select>
-        </div>
+      <div class="header-side">
+        <button id="tavitaChannelBtn" class="tavita-channel-btn" type="button">
+          کانال طاویتا
+        </button>
+      </div>
+    </header>
 
-        <div class="actions-row">
-          <button class="generate-btn" id="btn-title">
-            <span>💡</span>
-            <span>ساخت تیترها</span>
+    <main class="main">
+      <!-- معرفی (کشویی) -->
+      <section class="intro-card">
+        <div class="intro-header-row">
+          <div class="intro-title">
+            <span>✨</span>
+            کپشن‌ساز طاویتا چه کار می‌کند؟
+          </div>
+          <button id="introToggleBtn" class="intro-toggle-btn" type="button">
+            مشاهده توضیحات
           </button>
-          <div class="note-text">
-            چند گزینه تیتر پیشنهاد می‌شود؛ بهترین را انتخاب و با لحن خودت تنظیم کن.
-          </div>
         </div>
-
-        <div class="result-box">
-          <div class="result-header">
-            <div class="result-label">خروجی تیترها:</div>
-            <button type="button" class="copy-btn" data-copy-target="res-title">
-              📋 کپی تیترها
-            </button>
+        <div id="introBody" class="intro-body intro-body--collapsed">
+          <div class="intro-text">
+            این برنامک بر اساس <b>اصول نگارش کپشن حرفه‌ای</b> برای شبکه‌های اجتماعی طراحی شده؛
+            از ساخت تیترهای جذاب تا کپشن کامل و CTA دقیق. هر بار که روی «ساخت کپشن» می‌زنی،
+            طاویتا سعی می‌کند متنی بسازد که:
           </div>
-          <div id="res-title" class="result-empty">
-            اینجا لیستی از تیترهای پیشنهادی نمایش داده می‌شود.
+          <div class="intro-bullets">
+            <div class="intro-pill">
+              <span class="intro-pill-dot"></span>
+              موندگاری و تعامل (کامنت، ذخیره و اشتراک‌گذاری) را بالا ببرد
+            </div>
+            <div class="intro-pill">
+              <span class="intro-pill-dot"></span>
+              کمک کند محتوایت شانس وایرال شدن بیشتری داشته باشد
+            </div>
+            <div class="intro-pill">
+              <span class="intro-pill-dot"></span>
+              روی اعتماد، تبدیل و فروش تمرکز کند
+            </div>
+            <div class="intro-pill">
+              <span class="intro-pill-dot"></span>
+              با لحن و مخاطب برند تو هماهنگ باشد
+            </div>
           </div>
-        </div>
-      </article>
-
-      <!-- کارت ۳: پرامپت برای کاور / بنر -->
-      <article class="card" id="card-prompt">
-        <div class="card-header">
-          <div class="card-title-wrap">
-            <div class="card-icon"></div>
-            <div class="card-title-text">پرامپت برای طراحی کاور / بنر</div>
-          </div>
-          <div class="card-chip">برای استفاده در ابزارهای طراحی</div>
-        </div>
-
-        <p class="card-desc">
-          اگر با هوش مصنوعی یا طراح گرافیک کار می‌کنی، این بخش بهت کمک می‌کند پرامپت دقیق برای
-          طراحی کاور، بنر یا استوری بسازی.
-        </p>
-
-        <div class="field-row">
-          <label class="field-label">
-            <span>•</span> موضوع و پیام اصلی تصویر
-          </label>
-          <textarea
-            id="prompt-main"
-            class="field-textarea"
-            placeholder="مثلاً: پوستر معرفی دوره آموزش تولید محتوا برای صاحبان کسب‌وکار کوچک"
-          ></textarea>
-        </div>
-
-        <div class="two-cols">
-          <div class="field-row">
-            <label class="field-label">
-              <span>•</span> حس و سبک بصری
-            </label>
-            <select id="prompt-style" class="field-select">
-              <option value="مینیمال و تمیز">مینیمال و تمیز</option>
-              <option value="رنگی و انرژی‌بخش">رنگی و انرژی‌بخش</option>
-              <option value="لوکس و مینیمال">لوکس و مینیمال</option>
-              <option value="دوستانه و کارتونی">دوستانه و کارتونی</option>
-            </select>
-          </div>
-
-          <div class="field-row">
-            <label class="field-label">
-              <span>•</span> جزئیات مهم (اختیاری)
-            </label>
-            <input
-              id="prompt-extra"
-              class="field-input"
-              placeholder="مثلاً: تمرکز روی تیتر اصلی؛ استفاده از رنگ‌های آبی و نارنجی؛ جای لوگو در گوشه بالا"
-            />
-          </div>
-        </div>
-
-        <div class="actions-row">
-          <button class="generate-btn" id="btn-prompt">
-            <span>🎨</span>
-            <span>ساخت پرامپت</span>
+          <button id="introCloseBtn" class="intro-close-btn" type="button">
+            بستن توضیحات
           </button>
-          <div class="note-text">
-            این متن را می‌توانی مستقیم به ابزارهای طراحی یا طراح گرافیکت بدهی.
-          </div>
         </div>
+      </section>
 
-        <div class="result-box">
-          <div class="result-header">
-            <div class="result-label">خروجی پرامپت:</div>
-            <button type="button" class="copy-btn" data-copy-target="res-prompt">
-              📋 کپی پرامپت
-            </button>
+      <!-- دکمه‌های انتخاب بخش‌ها -->
+      <section class="mode-switch">
+        <button class="mode-btn active" data-mode-target="card-caption">
+          <span class="label">کپشن کامل برای پست</span>
+          <span class="icon">✍️</span>
+        </button>
+        <button class="mode-btn" data-mode-target="card-title">
+          <span class="label">تیتر و هوک برای شروع کپشن</span>
+          <span class="icon">💡</span>
+        </button>
+        <button class="mode-btn" data-mode-target="card-prompt">
+          <span class="label">پرامپت برای طراحی کاور / بنر</span>
+          <span class="icon">🎨</span>
+        </button>
+      </section>
+
+      <!-- کارت‌ها -->
+      <section class="cards">
+        <!-- کارت ۱: کپشن کامل -->
+        <article class="card active" id="card-caption">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <div class="card-icon"></div>
+              <div>
+                <div class="card-title-text">کپشن کامل برای پست</div>
+                <div class="card-subtitle">کپشن آماده انتشار + CTA + هشتگ</div>
+              </div>
+            </div>
+            <div class="chip">برای پست اصلی</div>
           </div>
-          <div id="res-prompt" class="result-empty">
-            بعد از ساخت، اینجا توصیف کامل برای کاور/بنر نمایش داده می‌شود.
+
+          <div class="card-body">
+            <div class="field-row">
+              <label class="field-label">
+                <span>•</span>
+                ایده / توضیح پست
+              </label>
+              <textarea
+                id="cap-idea"
+                class="field-textarea"
+                placeholder="مثلاً: معرفی محصول جدید، یک دوره، یک نکته آموزشی یا تجربه شخصی..."
+              ></textarea>
+              <div class="field-hint">
+                کوتاه و شفاف بنویس؛ اگر متن آماده داری، خلاصه‌اش را اینجا قرار بده.
+              </div>
+            </div>
+
+            <div class="row-two">
+              <div class="field-row">
+                <label class="field-label">
+                  <span>•</span> لحن کپشن
+                </label>
+                <select id="cap-tone" class="field-select">
+                  <option value="صمیمی و دوستانه">صمیمی و دوستانه</option>
+                  <option value="حرفه‌ای و آموزشی">حرفه‌ای و آموزشی</option>
+                  <option value="هیجانی و انگیزشی">هیجانی و انگیزشی</option>
+                  <option value="طنزآمیز و خودمانی">طنزآمیز و خودمانی</option>
+                  <option value="رسمی و جدی">رسمی و جدی</option>
+                </select>
+              </div>
+
+              <div class="field-row">
+                <label class="field-label">
+                  <span>•</span> پلتفرم
+                </label>
+                <select id="cap-platform" class="field-select">
+                  <option value="ایتا">ایتا</option>
+                  <option value="اینستاگرام">اینستاگرام</option>
+                  <option value="تلگرام">تلگرام</option>
+                  <option value="لینکدین">لینکدین</option>
+                  <option value="واتساپ یا پیام‌رسان دیگر">واتساپ یا پیام‌رسان دیگر</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <label class="field-label">
+                <span>•</span> توضیحات تکمیلی (اختیاری)
+              </label>
+              <textarea
+                id="cap-extra"
+                class="field-textarea"
+                placeholder="مثلاً: تخفیف، محدودیت زمانی، جزئیات مهم، توضیحات برند، لحن خاص، مخاطب خاص و..."
+              ></textarea>
+            </div>
+
+            <div class="actions-row">
+              <button id="btn-cap-generate" class="generate-btn" type="button">
+                <span>✨</span>
+                ساخت کپشن
+              </button>
+              <div class="note-text">
+                بعد از ساخت کپشن، حتماً آن را با لحن خودت ویرایش کن و اگر لازم بود کوتاه‌ترش کن.
+              </div>
+            </div>
+
+            <div class="result-box">
+              <div class="result-header">
+                <div class="result-label">کپشن پیشنهادی:</div>
+                <button class="copy-btn" data-copy-target="cap-result">کپی</button>
+              </div>
+              <div id="cap-result" class="res-box"></div>
+            </div>
           </div>
-        </div>
-      </article>
-    </section>
-  </main>
+        </article>
 
-  <!-- FOOTER -->
-  <footer class="footer-tip">
-    <div>
-      ⚠️ گاهی برای اتصال به هوش مصنوعی ممکن است به فیلترشکن نیاز باشد.
-      <b>قبل از انتشار، متن را حتماً با لحن خودت ویرایش کن.</b>
-    </div>
-  </footer>
-</div>
+        <!-- کارت ۲: تیتر و هوک -->
+        <article class="card" id="card-title">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <div class="card-icon"></div>
+              <div>
+                <div class="card-title-text">تیتر / هوک برای شروع کپشن</div>
+                <div class="card-subtitle">چند جمله جذاب برای ابتدای کپشن</div>
+              </div>
+            </div>
+            <div class="chip">فقط اول کپشن</div>
+          </div>
 
-<script>
-  async function callApi(payload) {
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json().catch(() => ({}));
+          <div class="card-body">
+            <div class="field-row">
+              <label class="field-label">
+                <span>•</span>
+                موضوع کلی پست
+              </label>
+              <textarea
+                id="title-topic"
+                class="field-textarea"
+                placeholder="مثلاً: معرفی یک دوره آموزشی، گفتن یک تجربه، اشتراک‌گذاری نکته مهم و..."
+              ></textarea>
+            </div>
 
-      if (!res.ok || data.ok === false) {
-        const msg =
-          data.error || "خطا در اتصال به سرور. لطفاً چند لحظه دیگر دوباره تلاش کن.";
-        throw new Error(msg);
+            <div class="row-two">
+              <div class="field-row">
+                <label class="field-label">
+                  <span>•</span> لحن تیتر
+                </label>
+                <select id="title-tone" class="field-select">
+                  <option value="هیجانی و انگیزشی">هیجانی و انگیزشی</option>
+                  <option value="آموزشی و کاربردی">آموزشی و کاربردی</option>
+                  <option value="صمیمی و دوستانه">صمیمی و دوستانه</option>
+                  <option value="رسمی و جدی">رسمی و جدی</option>
+                  <option value="طنزآمیز و بامزه">طنزآمیز و بامزه</option>
+                </select>
+              </div>
+
+              <div class="field-row">
+                <label class="field-label">
+                  <span>•</span> تعداد تیتر
+                </label>
+                <select id="title-count" class="field-select">
+                  <option value="3">۳ تیتر</option>
+                  <option value="5">۵ تیتر</option>
+                  <option value="7">۷ تیتر</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="actions-row">
+              <button id="btn-title-generate" class="generate-btn" type="button">
+                <span>✨</span>
+                ساخت تیترها
+              </button>
+            </div>
+
+            <div class="result-box">
+              <div class="result-header">
+                <div class="result-label">تیترهای پیشنهادی:</div>
+                <button class="copy-btn" data-copy-target="title-result">کپی</button>
+              </div>
+              <div id="title-result" class="res-box"></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- کارت ۳: پرامپت تصویر -->
+        <article class="card" id="card-prompt">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <div class="card-icon"></div>
+              <div>
+                <div class="card-title-text">پرامپت برای طراحی کاور / بنر</div>
+                <div class="card-subtitle">متن انگلیسی برای ساخت تصویر با هوش مصنوعی</div>
+              </div>
+            </div>
+            <div class="chip">Prompt</div>
+          </div>
+
+          <div class="card-body">
+            <div class="field-row">
+              <label class="field-label">
+                <span>•</span>
+                موضوع کلی تصویر
+              </label>
+              <textarea
+                id="prompt-topic"
+                class="field-textarea"
+                placeholder="مثلاً: طراحی کاور برای معرفی یک دوره، یک محصول، یا یک ویدیو آموزشی..."
+              ></textarea>
+            </div>
+
+            <div class="row-two">
+              <div class="field-row">
+                <label class="field-label">
+                  <span>•</span> سبک تصویر
+                </label>
+                <select id="prompt-style" class="field-select">
+                  <option value="modern and minimal">مدرن و مینیمال</option>
+                  <option value="colorful and energetic">رنگارنگ و پرانرژی</option>
+                  <option value="soft and pastel colors">ملایم و پاستلی</option>
+                  <option value="futuristic and tech">فانتزی / آینده‌نگر</option>
+                </select>
+              </div>
+
+              <div class="field-row">
+                <label class="field-label">
+                  <span>•</span> توضیحات اضافه (اختیاری)
+                </label>
+                <textarea
+                  id="prompt-extra"
+                  class="field-textarea"
+                  placeholder="مثلاً: رنگ‌ها، حال‌وهوا، حضور کاراکتر، نوع فونت روی بنر و..."
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="actions-row">
+              <button id="btn-prompt-generate" class="generate-btn" type="button">
+                <span>✨</span>
+                ساخت پرامپت
+              </button>
+            </div>
+
+            <div class="result-box">
+              <div class="result-header">
+                <div class="result-label">پرامپت پیشنهادی (انگلیسی):</div>
+                <button class="copy-btn" data-copy-target="prompt-result">کپی</button>
+              </div>
+              <div id="prompt-result" class="res-box"></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ستون کناری -->
+        <aside class="side-column">
+          <div class="side-card">
+            <div class="side-card-title">چند نکته برای استفاده بهتر</div>
+            <p>
+              • قبل از انتشار، کپشن را حتماً با لحن خودت ویرایش کن.<br />
+              • اگر متن طولانی شد، بخش‌های مهم را بولت‌گذاری کن.<br />
+              • در هر پست فقط یک CTA اصلی قرار بده.
+            </p>
+          </div>
+
+          <div class="side-card">
+            <div class="side-card-title">پیشنهاد طاویتا</div>
+            <p>
+              برای ساخت پرامپت تصویر، اول موضوع را فارسی بنویس،
+              طاویتا آن را به یک متن انگلیسی استاندارد تبدیل می‌کند که مستقیم می‌توانی در ابزارهای تصویرساز استفاده کنی.
+            </p>
+          </div>
+        </aside>
+      </section>
+
+      <div class="footer-note">
+        ساخته شده با ❤️ توسط طاویتا
+      </div>
+    </main>
+  </div>
+
+  <script>
+    async function callApi(payload) {
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || data.ok === false) {
+          const msg =
+            data.error || "خطا در اتصال به سرور. لطفاً چند لحظه دیگر دوباره تلاش کن.";
+          throw new Error(msg);
+        }
+
+        return data.answer || "";
+      } catch (err) {
+        console.error(err);
+        throw err;
       }
-
-      return data.answer || "پاسخی دریافت نشد، یک بار دیگر تلاش کن.";
-    } catch (err) {
-      throw err;
     }
-  }
 
-  function setLoading(button, isLoading, originalHtml) {
-    if (isLoading) {
-      button.disabled = true;
-      button.dataset.originalHtml = originalHtml;
-      button.textContent = "در حال ساخت...";
-    } else {
-      button.disabled = false;
-      button.innerHTML = originalHtml;
-    }
-  }
+    // مدیریت سوییچ بین کارت‌ها
+    (function setupModeSwitch() {
+      const buttons = document.querySelectorAll(".mode-btn");
+      const cards = document.querySelectorAll(".cards .card");
 
-  // تعویض بخش‌ها با دکمه‌ها
-  (function setupModes() {
-    const buttons = document.querySelectorAll(".mode-btn");
-    const cards = document.querySelectorAll(".cards .card");
+      if (!buttons.length || !cards.length) return;
 
-    if (!buttons.length || !cards.length) return;
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const targetId = btn.getAttribute("data-mode-target");
+          if (!targetId) return;
 
-    buttons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const targetId = btn.getAttribute("data-mode-target");
-        if (!targetId) return;
+          buttons.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
 
-        buttons.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-
-        cards.forEach((card) => {
-          card.classList.toggle("active", card.id === targetId);
+          cards.forEach((card) => {
+            card.classList.toggle("active", card.id === targetId);
+          });
         });
       });
-    });
-  })();
+    })();
 
-  // کارت ۱: کپشن کامل
-  const btnCaption = document.getElementById("btn-caption");
-  const resCaption = document.getElementById("res-caption");
+    // کارت کپشن کامل
+    (function setupCaptionCard() {
+      const btn = document.getElementById("btn-cap-generate");
+      if (!btn) return;
 
-  btnCaption.addEventListener("click", async () => {
-    const idea = document.getElementById("cap-idea").value.trim();
-    const platform = document.getElementById("cap-platform").value;
-    const tone = document.getElementById("cap-tone").value;
-    const goal = document.getElementById("cap-goal").value;
-    const formality = document.getElementById("cap-formality").value;
-    const audience = document.getElementById("cap-audience").value;
-    const lengthPref = document.getElementById("cap-length").value;
+      const ideaEl = document.getElementById("cap-idea");
+      const toneEl = document.getElementById("cap-tone");
+      const platformEl = document.getElementById("cap-platform");
+      const extraEl = document.getElementById("cap-extra");
+      const resultEl = document.getElementById("cap-result");
 
-    if (!idea) {
-      resCaption.textContent = "اول ایده یا توضیح پست را بنویس تا بتوانم کپشن بسازم.";
-      resCaption.classList.remove("result-empty");
-      return;
-    }
+      btn.addEventListener("click", async () => {
+        const idea = (ideaEl.value || "").trim();
+        if (!idea) {
+          resultEl.textContent = "لطفاً ایده یا توضیح کلی پست را بنویس 🌱";
+          return;
+        }
 
-    const originalHtml = btnCaption.innerHTML;
-    setLoading(btnCaption, true, originalHtml);
+        const tone = toneEl.value || "صمیمی و دوستانه";
+        const platform = platformEl.value || "ایتا";
+        const extra = (extraEl.value || "").trim();
 
-    const prompt = `
-تو یک نویسنده حرفه‌ای کپشن شبکه‌های اجتماعی هستی.
-
-بر اساس اطلاعات زیر یک کپشن کامل فارسی بنویس:
-- توضیح پست: ${idea}
-- پلتفرم: ${platform}
-- لحن متن: ${tone}
-- هدف کپشن: ${goal}
-- سطح رسمی بودن: ${formality}
-- مخاطب هدف: ${audience}
-- طول متن موردنظر: ${lengthPref}
-
-قوانین:
-- کپشن را در چند پاراگراف کوتاه و خوانا بنویس.
-- یک هوک جذاب در ابتدای کپشن اضافه کن.
-- در پایان، یک CTA (دعوت به اقدام) متناسب با هدف پیشنهاد بده.
-- ۳ تا ۶ هشتگ مرتبط و فارسی در انتها بیاور.
-- از ایموجی‌ها به شکل متعادل استفاده کن، نه بیش از حد.
-- متن طوری باشد که برای ${platform} مناسب و برای ${audience} قابل فهم و جذاب باشد.
-`;
-
-    try {
-      const answer = await callApi({ text: prompt });
-      resCaption.textContent = answer;
-      resCaption.classList.remove("result-empty");
-    } catch (err) {
-      resCaption.textContent = err.message;
-      resCaption.classList.remove("result-empty");
-    } finally {
-      setLoading(btnCaption, false, originalHtml);
-    }
-  });
-
-  // کارت ۲: تیتر
-  const btnTitle = document.getElementById("btn-title");
-  const resTitle = document.getElementById("res-title");
-
-  btnTitle.addEventListener("click", async () => {
-    const topic = document.getElementById("title-topic").value.trim();
-    const style = document.getElementById("title-style").value;
-
-    if (!topic) {
-      resTitle.textContent = "لطفاً موضوع یا درد مخاطب را بنویس تا تیترها را بسازم.";
-      resTitle.classList.remove("result-empty");
-      return;
-    }
-
-    const originalHtml = btnTitle.innerHTML;
-    setLoading(btnTitle, true, originalHtml);
-
-    const prompt = `
-چند تیتر کوتاه و جذاب برای ابتدای کپشن یا روی کاور پست شبکه‌های اجتماعی پیشنهاد بده.
+        const prompt = `
+یک کپشن کامل فارسی برای شبکه اجتماعی بساز.
 
 مشخصات:
-- موضوع/درد مخاطب: ${topic}
-- سبک تیتر: ${style}
+- پلتفرم: ${platform}
+- موضوع: ${idea}
+- لحن: ${tone}
+- نکات تکمیلی: ${extra || "چیزی نوشته نشده"}
 
-قوانین:
-- ۵ تا ۱۰ تیتر فارسی پیشنهاد بده.
-- هر تیتر را در یک خط جدا بنویس.
-- طول هر تیتر حداکثر ۱۲ کلمه باشد.
-- توجه را در همان چند کلمه اول جلب کند.
-- از علامت تعجب و ایموجی فقط در صورت نیاز استفاده کن.
-`;
+ساختار کپشن:
+1. شروع جذاب و درگیرکننده (هوک)
+2. توضیح اصلی، کوتاه و روان
+3. اگر نیاز است اشاره به مزایا / نکته اصلی
+4. در انتها یک CTA واضح (مثلاً ذخیره، کامنت، کلیک روی لینک)
 
-    try {
-      const answer = await callApi({ text: prompt });
-      resTitle.textContent = answer;
-      resTitle.classList.remove("result-empty");
-    } catch (err) {
-      resTitle.textContent = err.message;
-      resTitle.classList.remove("result-empty");
-    } finally {
-      setLoading(btnTitle, false, originalHtml);
-    }
-  });
+در انتها ۵ تا ۱۰ هشتگ فارسی متناسب با موضوع قرار بده.
+هشتگ‌ها را در یک یا دو خط جدا در انتهای متن بیاور.
+        `.trim();
 
-  // کارت ۳: پرامپت کاور/بنر
-  const btnPrompt = document.getElementById("btn-prompt");
-  const resPrompt = document.getElementById("res-prompt");
-
-  btnPrompt.addEventListener("click", async () => {
-    const main = document.getElementById("prompt-main").value.trim();
-    const style = document.getElementById("prompt-style").value;
-    const extra = document.getElementById("prompt-extra").value.trim();
-
-    if (!main) {
-      resPrompt.textContent = "ابتدا موضوع و پیام اصلی تصویر را وارد کن.";
-      resPrompt.classList.remove("result-empty");
-      return;
-    }
-
-    const originalHtml = btnPrompt.innerHTML;
-    setLoading(btnPrompt, true, originalHtml);
-
-    const prompt = `
-برای طراحی کاور/بنر یک پست یا استوری، یک پرامپت دقیق و انگلیسی بنویس تا به ابزارهای طراحی هوش مصنوعی (مثلاً Midjourney, DALL·E) داده شود.
-
-اطلاعات:
-- پیام/موضوع اصلی (فارسی): ${main}
-- حس و سبک بصری: ${style}
-- جزئیات اضافی (فارسی): ${extra || "چیزی ذکر نشده"}
-
-قوانین:
-- ابتدا یک خلاصه خیلی کوتاه از تصویر به انگلیسی بنویس.
-- سپس در ادامه، جزئیات ترکیب‌بندی، سبک، رنگ‌ها، نور، فونت و فضای کلی را توصیف کن.
-- حداکثر در دو پاراگراف انگلیسی واضح و قابل‌فهم بنویس.
-- از علائم اضافه و توضیح متا (مثل «Prompt:») استفاده نکن، فقط متن پرامپت را بده.
-`;
-
-    try {
-      const answer = await callApi({ text: prompt });
-      resPrompt.textContent = answer;
-      resPrompt.classList.remove("result-empty");
-    } catch (err) {
-      resPrompt.textContent = err.message;
-      resPrompt.classList.remove("result-empty");
-    } finally {
-      setLoading(btnPrompt, false, originalHtml);
-    }
-  });
-
-  // دکمه‌های کپی
-  (function setupCopyButtons() {
-    const buttons = document.querySelectorAll(".copy-btn");
-    if (!buttons.length) return;
-
-    buttons.forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const targetId = btn.getAttribute("data-copy-target");
-        const el = document.getElementById(targetId);
-        if (!el) return;
-
-        const text = el.innerText.trim();
-        if (!text) return;
-
+        btn.disabled = true;
         const original = btn.textContent;
+        btn.textContent = "در حال ساخت کپشن...";
 
         try {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(text);
-          } else {
-            const ta = document.createElement("textarea");
-            ta.value = text;
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand("copy");
-            document.body.removeChild(ta);
-          }
-          btn.textContent = "✅ کپی شد";
+          const answer = await callApi({ text: prompt });
+          resultEl.textContent = answer || "متنی دریافت نشد. لطفاً دوباره تلاش کن.";
         } catch (err) {
-          console.error(err);
-          btn.textContent = "کپی نشد 😔";
+          resultEl.textContent =
+            "اشکالی در ساخت کپشن پیش آمد. لطفاً چند لحظه دیگر دوباره تلاش کن. 🙏";
         } finally {
-          setTimeout(() => {
-            btn.textContent = original;
-          }, 1500);
+          btn.disabled = false;
+          btn.textContent = original;
         }
       });
-    });
-  })();
-</script>
+    })();
+
+    // کارت تیتر و هوک
+    (function setupTitleCard() {
+      const btn = document.getElementById("btn-title-generate");
+      if (!btn) return;
+
+      const topicEl = document.getElementById("title-topic");
+      const toneEl = document.getElementById("title-tone");
+      const countEl = document.getElementById("title-count");
+      const resultEl = document.getElementById("title-result");
+
+      btn.addEventListener("click", async () => {
+        const topic = (topicEl.value || "").trim();
+        if (!topic) {
+          resultEl.textContent = "لطفاً موضوع کلی پست را بنویس 🌱";
+          return;
+        }
+
+        const tone = toneEl.value || "هیجانی و انگیزشی";
+        const count = countEl.value || "3";
+
+        const prompt = `
+برای پستی با موضوع زیر، ${count} تیتر / هوک کوتاه و جذاب برای شروع کپشن پیشنهاد بده:
+
+موضوع: ${topic}
+
+لحن: ${tone}
+
+شرایط:
+- هر تیتر در یک خط جدا
+- زیاد طولانی نباشد
+- کاربر را کنجکاو و دعوت به ادامه خواندن کند
+        `.trim();
+
+        btn.disabled = true;
+        const original = btn.textContent;
+        btn.textContent = "در حال ساخت تیترها...";
+
+        try {
+          const answer = await callApi({ text: prompt });
+          resultEl.textContent = answer || "متنی دریافت نشد. دوباره تلاش کن.";
+        } catch (err) {
+          resultEl.textContent = "در ساخت تیترها مشکلی پیش آمد. بعداً دوباره امتحان کن. 🙏";
+        } finally {
+          btn.disabled = false;
+          btn.textContent = original;
+        }
+      });
+    })();
+
+    // کارت پرامپت تصویر
+    (function setupPromptCard() {
+      const btn = document.getElementById("btn-prompt-generate");
+      if (!btn) return;
+
+      const topicEl = document.getElementById("prompt-topic");
+      const styleEl = document.getElementById("prompt-style");
+      const extraEl = document.getElementById("prompt-extra");
+      const resultEl = document.getElementById("prompt-result");
+
+      btn.addEventListener("click", async () => {
+        const topic = (topicEl.value || "").trim();
+        if (!topic) {
+          resultEl.textContent = "لطفاً موضوع کلی تصویر را بنویس 🌱";
+          return;
+        }
+
+        const style = styleEl.value || "modern and minimal";
+        const extra = (extraEl.value || "").trim();
+
+        const prompt = `
+You are a prompt engineer for AI image generation tools (like Midjourney, DALL·E, etc.).
+Create a single, high-quality English prompt for designing a social media cover/banner.
+
+Details (in Persian):
+- Topic: ${topic}
+- Visual style: ${style}
+- Extra notes: ${extra || "not specified"}
+
+Requirements:
+- Write the final prompt ONLY in English.
+- 1–2 sentences maximum.
+- Mention camera view, lighting, color mood, and composition if helpful.
+        `.trim();
+
+        btn.disabled = true;
+        const original = btn.textContent;
+        btn.textContent = "در حال ساخت پرامپت...";
+
+        try {
+          const answer = await callApi({ text: prompt });
+          resultEl.textContent = answer || "متنی دریافت نشد. دوباره تلاش کن.";
+        } catch (err) {
+          resultEl.textContent = "در ساخت پرامپت مشکلی پیش آمد. دوباره امتحان کن. 🙏";
+        } finally {
+          btn.disabled = false;
+          btn.textContent = original;
+        }
+      });
+    })();
+
+    // دکمه‌های کپی
+    (function setupCopyButtons() {
+      const buttons = document.querySelectorAll(".copy-btn");
+      if (!buttons.length) return;
+
+      buttons.forEach((btn) => {
+        const targetId = btn.getAttribute("data-copy-target");
+        const target = targetId ? document.getElementById(targetId) : null;
+        if (!target) return;
+
+        btn.addEventListener("click", () => {
+          const text = (target.textContent || "").trim();
+          if (!text) {
+            const original = btn.textContent;
+            btn.textContent = "متنی برای کپی نیست";
+            setTimeout(() => {
+              btn.textContent = original;
+            }, 1000);
+            return;
+          }
+
+          const original = btn.textContent;
+          btn.textContent = "در حال کپی...";
+
+          try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(text).then(
+                () => {
+                  btn.textContent = "✅ کپی شد";
+                },
+                () => {
+                  btn.textContent = "کپی نشد 😔";
+                }
+              );
+            } else {
+              const ta = document.createElement("textarea");
+              ta.value = text;
+              ta.style.position = "fixed";
+              ta.style.opacity = "0";
+              document.body.appendChild(ta);
+              ta.select();
+              document.execCommand("copy");
+              document.body.removeChild(ta);
+              btn.textContent = "✅ کپی شد";
+            }
+          } catch (err) {
+            console.error(err);
+            btn.textContent = "کپی نشد 😔";
+          } finally {
+            setTimeout(() => {
+              btn.textContent = original;
+            }, 1500);
+          }
+        });
+      });
+    })();
+  </script>
+
+  <script>
+    (function () {
+      const introBody = document.getElementById("introBody");
+      const introToggleBtn = document.getElementById("introToggleBtn");
+      const introCloseBtn = document.getElementById("introCloseBtn");
+
+      function openIntro() {
+        if (introBody) introBody.classList.remove("intro-body--collapsed");
+        if (introToggleBtn) introToggleBtn.textContent = "مخفی کردن توضیحات";
+      }
+
+      function closeIntro() {
+        if (introBody) introBody.classList.add("intro-body--collapsed");
+        if (introToggleBtn) introToggleBtn.textContent = "مشاهده توضیحات";
+      }
+
+      if (introToggleBtn) {
+        introToggleBtn.addEventListener("click", function () {
+          if (!introBody) return;
+          const collapsed = introBody.classList.contains("intro-body--collapsed");
+          if (collapsed) {
+            openIntro();
+          } else {
+            closeIntro();
+          }
+        });
+      }
+
+      if (introCloseBtn) {
+        introCloseBtn.addEventListener("click", function () {
+          closeIntro();
+        });
+      }
+
+      function openInEitaaOrBrowser(url) {
+        if (
+          window.Eitaa &&
+          window.Eitaa.WebApp &&
+          typeof window.Eitaa.WebApp.openEitaaLink === "function"
+        ) {
+          try {
+            window.Eitaa.WebApp.openEitaaLink(url);
+            return;
+          } catch (e) {}
+        }
+        window.location.href = url;
+      }
+
+      const tavitaBtn = document.getElementById("tavitaChannelBtn");
+      if (tavitaBtn) {
+        tavitaBtn.addEventListener("click", function () {
+          openInEitaaOrBrowser("https://eitaa.com/tavita");
+        });
+      }
+
+      if (window.Eitaa && window.Eitaa.WebApp) {
+        try {
+          const wa = window.Eitaa.WebApp;
+          if (typeof wa.ready === "function") wa.ready();
+          if (typeof wa.expand === "function") wa.expand();
+        } catch (e) {}
+      }
+    })();
+  </script>
 </body>
 </html>
